@@ -1,0 +1,12 @@
+# This directory contains run artifacts
+# Each run creates a subdirectory: runs/<run_id>/
+# Run artifacts include:
+# - run_config.json
+# - signals.csv
+# - trades.csv
+# - backtest_request.json
+# - backtest_result.json
+# - llm_requests/
+# - llm_responses/
+# - summary.json
+# - report.md
