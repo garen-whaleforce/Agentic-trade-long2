@@ -228,6 +228,7 @@ class OrderBook:
     def open_position(
         self,
         symbol: str,
+        event_date: date,
         entry_date: date,
         exit_date: date,
         signal_id: str,
@@ -241,6 +242,7 @@ class OrderBook:
 
         Args:
             symbol: Stock symbol
+            event_date: Event date (T day - earnings call date)
             entry_date: Entry date (T+1)
             exit_date: Exit date (T+30)
             signal_id: Signal identifier
@@ -248,7 +250,14 @@ class OrderBook:
 
         Returns:
             Created PaperOrder
+
+        Raises:
+            ValueError: If event_date is not provided (fail-closed principle)
         """
+        # Fail-closed: event_date is required, no guessing
+        if event_date is None:
+            raise ValueError("event_date is required - fail-closed: no guessing allowed")
+
         import uuid
 
         order_id = f"paper_{uuid.uuid4().hex[:8]}"
@@ -257,7 +266,7 @@ class OrderBook:
             order_id=order_id,
             signal_id=signal_id,
             symbol=symbol,
-            event_date=entry_date,  # Approximate
+            event_date=event_date,  # Must be explicitly provided, not guessed
             entry_date=entry_date,
             exit_date=exit_date,
             score=score,
@@ -272,28 +281,58 @@ class OrderBook:
         self.add_order(order)
         return order
 
-    def close_due_positions(self, as_of_date: date) -> List[PaperOrder]:
+    def close_due_positions(
+        self,
+        as_of_date: date,
+        price_fetcher: Optional[callable] = None,
+    ) -> List[PaperOrder]:
         """
         Close all positions due to exit on a given date.
 
+        Fail-closed principle: If exit_price cannot be determined, the position
+        is NOT closed. This prevents incorrect PnL calculations.
+
         Args:
             as_of_date: Date to check for exits
+            price_fetcher: Optional function(symbol, date) -> float to get exit price.
+                           If not provided and positions need closing, raises ValueError.
 
         Returns:
             List of closed orders
+
+        Raises:
+            ValueError: If positions need to be closed but no price_fetcher is provided
+                       (fail-closed: no placeholder prices allowed)
         """
         due_orders = self.get_pending_exits(as_of_date)
+
+        if not due_orders:
+            return []
+
+        # Fail-closed: if there are orders to close, we MUST have a way to get prices
+        if price_fetcher is None:
+            raise ValueError(
+                f"Cannot close {len(due_orders)} positions without price_fetcher. "
+                "Fail-closed: placeholder prices are not allowed."
+            )
+
         closed = []
 
         for order in due_orders:
-            # In real paper trading, would get actual exit price
-            # For now, mark as exited with placeholder
-            order.status = OrderStatus.CLOSED
-            order.exited_at = datetime.utcnow().isoformat()
-            closed.append(order)
+            try:
+                exit_price = price_fetcher(order.symbol, as_of_date)
+                if exit_price is None:
+                    raise ValueError(f"price_fetcher returned None for {order.symbol}")
 
-        if closed:
-            self._save_orders()
+                self.mark_exited(order.order_id, exit_price)
+                closed.append(order)
+            except Exception as e:
+                # Log error but don't close with placeholder - fail-closed principle
+                import logging
+                logging.getLogger("order_book").error(
+                    f"Failed to close position {order.order_id}: {e}. "
+                    "Position will remain open (fail-closed)."
+                )
 
         return closed
 

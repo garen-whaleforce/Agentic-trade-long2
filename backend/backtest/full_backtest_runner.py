@@ -183,22 +183,41 @@ class FullBacktestRunner:
                     event["event_id"]
                 )
 
-                # Run analysis
-                analysis = await self.analyzer.analyze(
+                # Run analysis using .run() for complete LLMRequest/LLMResponse artifacts
+                from data.transcript_pack_builder import TranscriptPackBuilder
+                builder = TranscriptPackBuilder()
+                pack = builder.build(transcript)
+
+                llm_request, llm_response = await self.analyzer.run(
                     event_id=event["event_id"],
-                    transcript=transcript,
+                    pack=pack,
                 )
 
-                # Log request/response
+                # Build analysis dict from response (for gate evaluation)
+                analysis = {
+                    "event_id": event["event_id"],
+                    "score": llm_response.parsed_output.score if llm_response.parsed_output else 0.0,
+                    "trade_candidate": llm_response.parsed_output.trade_candidate if llm_response.parsed_output else False,
+                    "evidence_count": llm_response.parsed_output.evidence_count if llm_response.parsed_output else 0,
+                    "key_flags": llm_response.parsed_output.key_flags.model_dump() if llm_response.parsed_output else {},
+                    "evidence_snippets": [e.model_dump() for e in llm_response.parsed_output.evidence_snippets] if llm_response.parsed_output else [],
+                    "no_trade_reason": llm_response.parsed_output.no_trade_reason if llm_response.parsed_output else llm_response.parse_error,
+                    "cost_usd": llm_response.cost_usd,
+                    "latency_ms": llm_response.latency_ms,
+                    "model": llm_response.model,
+                    "prompt_version": self.analyzer.prompt_version,
+                }
+
+                # Log complete LLMRequest/LLMResponse artifacts (includes prompt_hash, rendered_prompt, token_usage)
                 self.logger.log_llm_request(
                     self.config.run_id,
                     event["event_id"],
-                    {"event": event, "model": self.config.model},
+                    llm_request.model_dump(),
                 )
                 self.logger.log_llm_response(
                     self.config.run_id,
                     event["event_id"],
-                    analysis,
+                    llm_response.model_dump(),
                 )
 
                 # Add event metadata

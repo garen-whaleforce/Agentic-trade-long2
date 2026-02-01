@@ -147,10 +147,15 @@ class PaperTradingRunner:
                 return result
 
             # Check freeze policy - validate runtime configuration matches frozen manifest
+            # PR7: Now includes prompt_hash validation for SSOT
             try:
+                # Get current prompt_hash from analyzer for comparison
+                current_prompt_hash = self.analyzer.prompt_hash if hasattr(self.analyzer, 'prompt_hash') else None
+
                 validate_runtime(
                     batch_score_model=self.frozen.model,
                     prompt_version=self.frozen.prompt_version,
+                    prompt_hash=current_prompt_hash,  # PR7: Pass prompt_hash for SSOT validation
                     score_threshold=self.frozen.score_threshold,
                     evidence_min_count=self.frozen.evidence_min_count,
                 )
@@ -276,28 +281,47 @@ class PaperTradingRunner:
                     event["event_id"]
                 )
 
-                # Run analysis
-                analysis = await self.analyzer.analyze(
+                # Run analysis using .run() for complete LLMRequest/LLMResponse artifacts
+                from data.transcript_pack_builder import TranscriptPackBuilder
+                builder = TranscriptPackBuilder()
+                pack = builder.build(transcript)
+
+                llm_request, llm_response = await self.analyzer.run(
                     event_id=event["event_id"],
-                    transcript=transcript,
+                    pack=pack,
                 )
 
+                # Build analysis dict from response (for gate evaluation)
+                analysis = {
+                    "event_id": event["event_id"],
+                    "score": llm_response.parsed_output.score if llm_response.parsed_output else 0.0,
+                    "trade_candidate": llm_response.parsed_output.trade_candidate if llm_response.parsed_output else False,
+                    "evidence_count": llm_response.parsed_output.evidence_count if llm_response.parsed_output else 0,
+                    "key_flags": llm_response.parsed_output.key_flags.model_dump() if llm_response.parsed_output else {},
+                    "evidence_snippets": [e.model_dump() for e in llm_response.parsed_output.evidence_snippets] if llm_response.parsed_output else [],
+                    "no_trade_reason": llm_response.parsed_output.no_trade_reason if llm_response.parsed_output else llm_response.parse_error,
+                    "cost_usd": llm_response.cost_usd,
+                    "latency_ms": llm_response.latency_ms,
+                    "model": llm_response.model,
+                    "prompt_version": self.analyzer.prompt_version,
+                }
+
                 # Record metrics
-                latency = (datetime.now() - start_time).total_seconds() * 1000
+                latency = llm_response.latency_ms
                 self.metrics.record("analysis_latency", latency)
-                self.metrics.record("llm_cost", analysis.get("cost_usd", 0))
+                self.metrics.record("llm_cost", llm_response.cost_usd)
                 self.metrics.record("signal_analyzed", 1)
 
-                # Log artifacts
+                # Log complete LLMRequest/LLMResponse artifacts (includes prompt_hash, rendered_prompt, token_usage)
                 self.artifact_logger.log_llm_request(
                     run_id,
                     event["event_id"],
-                    {"event": event},
+                    llm_request.model_dump(),
                 )
                 self.artifact_logger.log_llm_response(
                     run_id,
                     event["event_id"],
-                    analysis,
+                    llm_response.model_dump(),
                 )
 
                 analysis["event"] = event
@@ -329,10 +353,14 @@ class PaperTradingRunner:
 
             position = self.order_book.open_position(
                 symbol=event["symbol"],
+                event_date=event_date,  # Pass actual event_date, not entry_date
                 entry_date=entry_date,
                 exit_date=exit_date,
                 signal_id=event["event_id"],
                 score=signal.get("score", 0),
+                run_id=self.artifact_logger._current_run_id if hasattr(self.artifact_logger, '_current_run_id') else "paper",
+                model=self.frozen.model,
+                prompt_version=self.frozen.prompt_version,
             )
 
             self.metrics.record("position_opened", 1)
@@ -347,11 +375,42 @@ class PaperTradingRunner:
     async def _close_due_positions(self, as_of_date: date) -> int:
         """Close positions that are due to exit."""
         try:
-            closed = self.order_book.close_due_positions(as_of_date)
+            # Define price fetcher - in production this would call market data API
+            async def get_close_price(symbol: str, date_: date) -> Optional[float]:
+                """Fetch closing price from market data source."""
+                try:
+                    # TODO: Replace with actual market data API call
+                    # For now, we'll use the earnings client if it has price data
+                    # or raise to trigger fail-closed
+                    from services.market_data_client import get_market_data_client
+                    client = get_market_data_client()
+                    return await client.get_close_price(symbol, date_)
+                except ImportError:
+                    logger.warning("market_data_client not available, cannot fetch prices")
+                    return None
+                except Exception as e:
+                    logger.error(f"Failed to get price for {symbol} on {date_}: {e}")
+                    return None
+
+            # Sync wrapper for the price fetcher
+            def price_fetcher(symbol: str, date_: date) -> Optional[float]:
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                    return loop.run_until_complete(get_close_price(symbol, date_))
+                except RuntimeError:
+                    # No event loop, create one
+                    return asyncio.run(get_close_price(symbol, date_))
+
+            closed = self.order_book.close_due_positions(as_of_date, price_fetcher=price_fetcher)
             if closed:
                 self.metrics.record("positions_closed", len(closed))
                 logger.info(f"Closed {len(closed)} positions")
             return len(closed)
+        except ValueError as e:
+            # Fail-closed triggered - log but don't crash
+            logger.warning(f"Fail-closed triggered for position closing: {e}")
+            return 0
         except Exception as e:
             logger.error(f"Failed to close positions: {e}")
             return 0

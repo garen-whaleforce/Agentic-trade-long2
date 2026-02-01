@@ -274,6 +274,7 @@ class FreezePolicy:
         batch_score_prompt_hash: Optional[str] = None,
         full_audit_prompt_id: Optional[str] = None,
         full_audit_prompt_hash: Optional[str] = None,
+        auto_load_prompt_hash: bool = True,
     ) -> FreezeManifest:
         """
         Create and save a freeze manifest with default or custom settings.
@@ -281,7 +282,46 @@ class FreezePolicy:
         This is a convenience method for enabling paper trading.
 
         PR2: Now accepts prompt_id and prompt_hash for SSOT validation.
+        PR7: Auto-loads prompt_hash from PromptRegistry if not explicitly provided.
+
+        Args:
+            auto_load_prompt_hash: If True and prompt_hash not provided, automatically
+                                   load from PromptRegistry. Set to False only for testing.
         """
+        # Auto-load prompt_hash from PromptRegistry if not provided
+        if auto_load_prompt_hash:
+            if batch_score_prompt_hash is None:
+                try:
+                    from llm.prompt_registry import get_prompt_registry
+                    registry = get_prompt_registry()
+                    # Load batch_score prompt template
+                    template = registry.load(batch_score_prompt_version)
+                    batch_score_prompt_id = template.template_id
+                    batch_score_prompt_hash = template.prompt_hash
+                except (ImportError, FileNotFoundError) as e:
+                    # Log warning but don't fail - allow manual hash provision
+                    import logging
+                    logging.getLogger("freeze_policy").warning(
+                        f"Could not auto-load batch_score prompt_hash: {e}. "
+                        "Provide prompt_hash explicitly or ensure prompt file exists."
+                    )
+
+            if full_audit_prompt_hash is None:
+                try:
+                    from llm.prompt_registry import get_prompt_registry
+                    registry = get_prompt_registry()
+                    # Load full_audit prompt template
+                    template = registry.load(full_audit_prompt_version)
+                    full_audit_prompt_id = template.template_id
+                    full_audit_prompt_hash = template.prompt_hash
+                except (ImportError, FileNotFoundError) as e:
+                    # Log warning but don't fail
+                    import logging
+                    logging.getLogger("freeze_policy").warning(
+                        f"Could not auto-load full_audit prompt_hash: {e}. "
+                        "Provide prompt_hash explicitly or ensure prompt file exists."
+                    )
+
         return self.create_manifest(
             git_commit=git_commit,
             batch_score_model=batch_score_model,

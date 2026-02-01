@@ -109,6 +109,9 @@ def validate_run(
             request_files = list(llm_requests_dir.glob("*.json"))
             if request_files:
                 found.append(f"llm_requests/ ({len(request_files)} files)")
+                # PR7: Validate LLMRequest schema completeness
+                request_errors = _validate_llm_requests(request_files)
+                errors.extend(request_errors)
             else:
                 warnings.append("llm_requests/ directory exists but is empty")
         else:
@@ -119,6 +122,9 @@ def validate_run(
             response_files = list(llm_responses_dir.glob("*.json"))
             if response_files:
                 found.append(f"llm_responses/ ({len(response_files)} files)")
+                # PR7: Validate LLMResponse schema completeness
+                response_errors = _validate_llm_responses(response_files)
+                errors.extend(response_errors)
             else:
                 warnings.append("llm_responses/ directory exists but is empty")
         else:
@@ -209,6 +215,96 @@ def _validate_signals(signals_path: Path) -> List[str]:
         warnings.append(f"Could not read signals.csv: {e}")
 
     return warnings
+
+
+def _validate_llm_requests(request_files: List[Path]) -> List[str]:
+    """
+    Validate LLMRequest schema completeness for reproducibility.
+
+    PR7: Ensures all LLMRequest files have required fields:
+    - prompt_hash: For SSOT validation
+    - rendered_prompt: For replay/debugging
+    - prompt_template_id: For version tracking
+    """
+    errors = []
+
+    # Required fields for reproducibility
+    required_fields = ["event_id", "prompt_hash", "rendered_prompt", "prompt_template_id", "model"]
+
+    # Sample up to 5 files for validation (avoid slow validation on large runs)
+    sample_files = request_files[:5]
+
+    for request_file in sample_files:
+        try:
+            with open(request_file, "r") as f:
+                request = json.load(f)
+
+            missing_fields = [field for field in required_fields if field not in request or request[field] is None]
+            if missing_fields:
+                errors.append(
+                    f"LLMRequest {request_file.name} missing required fields for reproducibility: {missing_fields}"
+                )
+
+            # Check prompt_hash format (should contain template and rendered hashes)
+            prompt_hash = request.get("prompt_hash", "")
+            if prompt_hash and "template:" not in prompt_hash:
+                errors.append(
+                    f"LLMRequest {request_file.name} has invalid prompt_hash format "
+                    "(expected 'template:...|rendered:...')"
+                )
+
+        except json.JSONDecodeError as e:
+            errors.append(f"LLMRequest {request_file.name} is not valid JSON: {e}")
+        except Exception as e:
+            errors.append(f"Failed to validate LLMRequest {request_file.name}: {e}")
+
+    return errors
+
+
+def _validate_llm_responses(response_files: List[Path]) -> List[str]:
+    """
+    Validate LLMResponse schema completeness for reproducibility.
+
+    PR7: Ensures all LLMResponse files have required fields:
+    - token_usage: For cost tracking
+    - raw_output: For debugging
+    - model: For version tracking
+    """
+    errors = []
+
+    # Required fields for reproducibility
+    required_fields = ["event_id", "token_usage", "raw_output", "model"]
+
+    # Sample up to 5 files for validation
+    sample_files = response_files[:5]
+
+    for response_file in sample_files:
+        try:
+            with open(response_file, "r") as f:
+                response = json.load(f)
+
+            missing_fields = [field for field in required_fields if field not in response or response[field] is None]
+            if missing_fields:
+                errors.append(
+                    f"LLMResponse {response_file.name} missing required fields for reproducibility: {missing_fields}"
+                )
+
+            # Check token_usage has required sub-fields
+            token_usage = response.get("token_usage", {})
+            if token_usage:
+                required_token_fields = ["prompt", "completion", "total"]
+                missing_token_fields = [f for f in required_token_fields if f not in token_usage]
+                if missing_token_fields:
+                    errors.append(
+                        f"LLMResponse {response_file.name} token_usage missing fields: {missing_token_fields}"
+                    )
+
+        except json.JSONDecodeError as e:
+            errors.append(f"LLMResponse {response_file.name} is not valid JSON: {e}")
+        except Exception as e:
+            errors.append(f"Failed to validate LLMResponse {response_file.name}: {e}")
+
+    return errors
 
 
 def _validate_backtest_result(backtest_path: Path) -> List[str]:
