@@ -16,6 +16,7 @@ from core.config import settings
 from data.transcript_pack_builder import TranscriptPack
 from schemas.llm_output import BatchScoreOutput, Evidence, KeyFlags
 from .routing import LLMRouter, LLMConfig, get_llm_router
+from .prompt_registry import PromptRegistry, PromptTemplate, get_prompt_registry
 
 
 class LLMRequest(BaseModel):
@@ -36,10 +37,10 @@ class LLMResponse(BaseModel):
     event_id: str
     timestamp: str
     model: str
-    raw_response: Dict[str, Any]
+    raw_output: Dict[str, Any]  # Named to match frontend expectations
     parsed_output: Optional[BatchScoreOutput] = None
     parse_error: Optional[str] = None
-    token_usage: Dict[str, int]
+    token_usage: Dict[str, int]  # Should include "total", "prompt", "completion"
     cost_usd: float
     latency_ms: int
 
@@ -53,13 +54,15 @@ class ScoreOnlyRunner:
     - Strict JSON schema enforcement
     - Deterministic (temperature=0)
     - Evidence triangulation enforcement
+    - Versioned prompts loaded from files for reproducibility
     """
 
-    PROMPT_TEMPLATE = """Analyze the following earnings call transcript for {symbol} ({company_name}).
+    # Fallback prompts (used only if prompt file not found)
+    _FALLBACK_USER_TEMPLATE = """Analyze the following earnings call transcript for {symbol} ({company_name}).
 Fiscal Period: Q{quarter} {year}
 Event Date: {event_date}
 
-{transcript_content}
+{transcript_pack}
 
 Based on the transcript above, provide your analysis in the specified JSON format.
 Remember:
@@ -67,7 +70,7 @@ Remember:
 - If insufficient evidence, set trade_candidate to false
 - Keep response under 300 tokens"""
 
-    SYSTEM_PROMPT = """You are a financial analyst specializing in earnings call analysis for quantitative trading.
+    _FALLBACK_SYSTEM_PROMPT = """You are a financial analyst specializing in earnings call analysis for quantitative trading.
 Your task is to evaluate whether an earnings call transcript indicates a potential LONG opportunity.
 
 CRITICAL RULES:
@@ -97,7 +100,7 @@ JSON Schema:
         self,
         model: Optional[str] = None,
         router: Optional[LLMRouter] = None,
-        prompt_version: str = "v1.0.0",
+        prompt_version: str = "batch_score_v1",
     ):
         """
         Initialize the runner.
@@ -105,22 +108,59 @@ JSON Schema:
         Args:
             model: Override model (optional, uses router default if not set)
             router: LLM router instance
-            prompt_version: Version of the prompt
+            prompt_version: Prompt template ID to load (e.g., "batch_score_v1")
         """
         self.router = router or get_llm_router()
         self.prompt_version = prompt_version
         self._model_override = model
+        self._prompt_registry = get_prompt_registry()
+        self._loaded_prompt: Optional[PromptTemplate] = None
+
+    def _get_prompt_template(self) -> PromptTemplate:
+        """Load the prompt template from registry (with caching)."""
+        if self._loaded_prompt is None:
+            try:
+                self._loaded_prompt = self._prompt_registry.load(self.prompt_version)
+            except FileNotFoundError:
+                # Use fallback if file not found
+                self._loaded_prompt = PromptTemplate(
+                    template_id=f"fallback_{self.prompt_version}",
+                    version="1.0.0",
+                    mode="batch_score",
+                    max_output_tokens=400,
+                    system_prompt=self._FALLBACK_SYSTEM_PROMPT,
+                    user_template=self._FALLBACK_USER_TEMPLATE,
+                    prompt_hash=hashlib.sha256(
+                        f"{self._FALLBACK_SYSTEM_PROMPT}\n---\n{self._FALLBACK_USER_TEMPLATE}".encode()
+                    ).hexdigest()[:16],
+                )
+        return self._loaded_prompt
+
+    @property
+    def prompt_template_id(self) -> str:
+        """Get the prompt template ID."""
+        return self._get_prompt_template().template_id
+
+    @property
+    def prompt_hash(self) -> str:
+        """Get the prompt hash (for tracking/reproducibility)."""
+        return self._get_prompt_template().prompt_hash
 
     def _render_prompt(self, pack: TranscriptPack) -> str:
         """Render the user prompt with transcript pack."""
-        return self.PROMPT_TEMPLATE.format(
+        template = self._get_prompt_template()
+        return template.render_user_prompt(
             symbol=pack.symbol,
             company_name=pack.company_name,
             quarter=pack.fiscal_quarter,
             year=pack.fiscal_year,
             event_date=pack.event_date,
-            transcript_content=pack.to_llm_context(),
+            transcript_pack=pack.to_llm_context(),
         )
+
+    def _get_system_prompt(self) -> str:
+        """Get the system prompt from loaded template."""
+        return self._get_prompt_template().system_prompt
 
     def _calculate_prompt_hash(self, prompt: str) -> str:
         """Calculate hash of the rendered prompt."""
@@ -195,15 +235,15 @@ JSON Schema:
 
         # Render prompt
         user_prompt = self._render_prompt(pack)
-        prompt_hash = self._calculate_prompt_hash(user_prompt)
+        rendered_prompt_hash = self._calculate_prompt_hash(user_prompt)
 
-        # Create request record
+        # Create request record with proper template tracking
         request = LLMRequest(
             event_id=event_id,
             timestamp=datetime.utcnow().isoformat(),
             model=config.model,
-            prompt_template_id=f"batch_score_{self.prompt_version}",
-            prompt_hash=prompt_hash,
+            prompt_template_id=self.prompt_template_id,
+            prompt_hash=f"template:{self.prompt_hash}|rendered:{rendered_prompt_hash}",
             rendered_prompt=user_prompt,
             parameters={
                 "temperature": config.temperature,
@@ -222,17 +262,19 @@ JSON Schema:
             litellm.drop_params = True  # Drop unsupported params gracefully
 
             messages = [
-                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "system", "content": self._get_system_prompt()},
                 {"role": "user", "content": user_prompt},
             ]
 
             # Make actual API call
+            # Enable JSON mode for both "json" and "json_object" response formats
+            use_json_mode = config.response_format in ("json", "json_object")
             llm_response = await litellm.acompletion(
                 model=config.model,
                 messages=messages,
                 temperature=config.temperature,
                 max_tokens=config.max_output_tokens,
-                response_format={"type": "json_object"} if config.response_format == "json_object" else None,
+                response_format={"type": "json_object"} if use_json_mode else None,
                 timeout=30,
             )
 
@@ -301,12 +343,12 @@ JSON Schema:
             event_id=event_id,
             timestamp=datetime.utcnow().isoformat(),
             model=config.model,
-            raw_response=raw_output,
+            raw_output=raw_output,
             parsed_output=parsed_output,
             parse_error=parse_error,
             token_usage={
-                "input": input_tokens,
-                "output": output_tokens,
+                "prompt": input_tokens,
+                "completion": output_tokens,
                 "total": input_tokens + output_tokens,
             },
             cost_usd=cost,
