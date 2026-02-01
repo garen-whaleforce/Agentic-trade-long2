@@ -17,6 +17,7 @@ from data.transcript_pack_builder import TranscriptPack
 from schemas.llm_output import BatchScoreOutput, Evidence, KeyFlags
 from .routing import LLMRouter, LLMConfig, get_llm_router
 from .prompt_registry import PromptRegistry, PromptTemplate, get_prompt_registry
+from .json_parser import parse_llm_json, NO_TRADE_DEFAULT  # PR3: Robust JSON parsing
 
 
 class LLMRequest(BaseModel):
@@ -170,6 +171,11 @@ JSON Schema:
         """
         Parse and validate LLM response.
 
+        PR3: Uses robust JSON parsing with recovery for common LLM issues:
+        - Markdown code blocks
+        - Trailing commas
+        - Truncated JSON
+
         Args:
             raw_response: Raw JSON string from LLM
 
@@ -177,12 +183,17 @@ JSON Schema:
             Validated BatchScoreOutput
 
         Raises:
-            ValueError: If response is invalid
+            ValueError: If response is invalid after all recovery attempts
         """
-        try:
-            # Parse JSON
-            data = json.loads(raw_response)
+        # PR3: Use robust JSON parser
+        result = parse_llm_json(raw_response)
 
+        if not result.success:
+            raise ValueError(f"JSON parse failed: {result.error}")
+
+        data = result.data
+
+        try:
             # Validate with Pydantic
             output = BatchScoreOutput(
                 score=data.get("score", 0),
@@ -197,8 +208,6 @@ JSON Schema:
 
             return output
 
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON: {str(e)}")
         except ValidationError as e:
             raise ValueError(f"Schema validation failed: {str(e)}")
 
@@ -280,7 +289,15 @@ JSON Schema:
 
             # Extract response content
             raw_text = llm_response.choices[0].message.content
-            raw_output = json.loads(raw_text)
+
+            # PR3: Use robust JSON parsing for initial response parsing
+            parse_result = parse_llm_json(raw_text)
+            if parse_result.success:
+                raw_output = parse_result.data
+            else:
+                # Fallback to NO_TRADE on parse failure
+                raw_output = NO_TRADE_DEFAULT.copy()
+                raw_output["no_trade_reason"] = f"JSON parse failed: {parse_result.error}"
 
             # Get actual token usage
             input_tokens = llm_response.usage.prompt_tokens

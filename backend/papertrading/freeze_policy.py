@@ -3,6 +3,10 @@ Freeze Policy for Paper Trading.
 
 Ensures model, prompt, and threshold versions are locked
 during forward/paper trading period (2026-01-01 onwards).
+
+PR2 Update:
+- Added prompt_id and prompt_hash fields for SSOT
+- validate_runtime now checks prompt_hash
 """
 
 import hashlib
@@ -21,6 +25,10 @@ class FreezeManifest(BaseModel):
     Manifest of frozen configuration for paper trading.
 
     Once frozen, these cannot be changed without explicit unlock.
+
+    PR2: Added prompt_id and prompt_hash for SSOT validation.
+    The prompt_hash is SHA256 of system_prompt + user_template content,
+    ensuring any prompt change is detectable even if version string stays the same.
     """
 
     frozen_at: str
@@ -31,9 +39,15 @@ class FreezeManifest(BaseModel):
     batch_score_model: str
     full_audit_model: str
 
-    # Prompt versions
+    # Prompt versions (human-readable)
     batch_score_prompt_version: str
     full_audit_prompt_version: str
+
+    # PR2: Prompt IDs and hashes (SSOT)
+    batch_score_prompt_id: Optional[str] = None
+    batch_score_prompt_hash: Optional[str] = None
+    full_audit_prompt_id: Optional[str] = None
+    full_audit_prompt_hash: Optional[str] = None
 
     # Thresholds
     score_threshold: float
@@ -113,17 +127,33 @@ class FreezePolicy:
         evidence_min_count: int,
         block_on_margin_concern: bool = True,
         universe_filter: Optional[str] = None,
+        batch_score_prompt_id: Optional[str] = None,
+        batch_score_prompt_hash: Optional[str] = None,
+        full_audit_prompt_id: Optional[str] = None,
+        full_audit_prompt_hash: Optional[str] = None,
     ) -> FreezeManifest:
         """
         Create a new freeze manifest.
 
         Args:
-            Various configuration parameters
+            git_commit: Git commit hash
+            batch_score_model: Model for batch scoring
+            full_audit_model: Model for full audit
+            batch_score_prompt_version: Human-readable version for batch score prompt
+            full_audit_prompt_version: Human-readable version for full audit prompt
+            score_threshold: Score threshold for signals
+            evidence_min_count: Minimum evidence count
+            block_on_margin_concern: Whether to block on margin concerns
+            universe_filter: Optional universe filter
+            batch_score_prompt_id: PR2: Prompt ID for batch scoring (from PromptRegistry)
+            batch_score_prompt_hash: PR2: SHA256 hash of batch score prompt content
+            full_audit_prompt_id: PR2: Prompt ID for full audit (from PromptRegistry)
+            full_audit_prompt_hash: PR2: SHA256 hash of full audit prompt content
 
         Returns:
             FreezeManifest
         """
-        # Calculate hash
+        # Calculate hash (now includes prompt hashes for SSOT)
         content = json.dumps(
             {
                 "git_commit": git_commit,
@@ -131,6 +161,8 @@ class FreezePolicy:
                 "full_audit_model": full_audit_model,
                 "batch_score_prompt_version": batch_score_prompt_version,
                 "full_audit_prompt_version": full_audit_prompt_version,
+                "batch_score_prompt_hash": batch_score_prompt_hash,
+                "full_audit_prompt_hash": full_audit_prompt_hash,
                 "score_threshold": score_threshold,
                 "evidence_min_count": evidence_min_count,
                 "block_on_margin_concern": block_on_margin_concern,
@@ -148,6 +180,10 @@ class FreezePolicy:
             full_audit_model=full_audit_model,
             batch_score_prompt_version=batch_score_prompt_version,
             full_audit_prompt_version=full_audit_prompt_version,
+            batch_score_prompt_id=batch_score_prompt_id,
+            batch_score_prompt_hash=batch_score_prompt_hash,
+            full_audit_prompt_id=full_audit_prompt_id,
+            full_audit_prompt_hash=full_audit_prompt_hash,
             score_threshold=score_threshold,
             evidence_min_count=evidence_min_count,
             block_on_margin_concern=block_on_margin_concern,
@@ -234,11 +270,17 @@ class FreezePolicy:
         score_threshold: float = 0.70,
         evidence_min_count: int = 2,
         block_on_margin_concern: bool = True,
+        batch_score_prompt_id: Optional[str] = None,
+        batch_score_prompt_hash: Optional[str] = None,
+        full_audit_prompt_id: Optional[str] = None,
+        full_audit_prompt_hash: Optional[str] = None,
     ) -> FreezeManifest:
         """
         Create and save a freeze manifest with default or custom settings.
 
         This is a convenience method for enabling paper trading.
+
+        PR2: Now accepts prompt_id and prompt_hash for SSOT validation.
         """
         return self.create_manifest(
             git_commit=git_commit,
@@ -249,6 +291,10 @@ class FreezePolicy:
             score_threshold=score_threshold,
             evidence_min_count=evidence_min_count,
             block_on_margin_concern=block_on_margin_concern,
+            batch_score_prompt_id=batch_score_prompt_id,
+            batch_score_prompt_hash=batch_score_prompt_hash,
+            full_audit_prompt_id=full_audit_prompt_id,
+            full_audit_prompt_hash=full_audit_prompt_hash,
         )
 
     def is_frozen(self) -> bool:
@@ -261,11 +307,35 @@ def get_freeze_policy() -> FreezePolicy:
     return FreezePolicy()
 
 
+def compute_prompt_hash(system_prompt: str, user_template: str) -> str:
+    """
+    Compute SHA256 hash of prompt content.
+
+    PR2: This is the SSOT for prompt versioning. Any change to prompt content
+    will result in a different hash, even if version string stays the same.
+
+    Args:
+        system_prompt: The system prompt content
+        user_template: The user template content
+
+    Returns:
+        SHA256 hash of combined content (first 64 chars of hex digest)
+    """
+    combined = f"{system_prompt}\n---\n{user_template}"
+    return hashlib.sha256(combined.encode()).hexdigest()
+
+
 class FrozenConfig(BaseModel):
-    """Simplified frozen config for runtime use."""
+    """Simplified frozen config for runtime use.
+
+    PR2: Added prompt_id and prompt_hash for SSOT validation.
+    """
 
     model: str = "gpt-4o-mini"
     prompt_version: str = "v1.0.0"
+    # PR2: Prompt SSOT fields
+    prompt_id: Optional[str] = None
+    prompt_hash: Optional[str] = None
     score_threshold: float = 0.70
     evidence_min_count: int = 2
     block_on_margin_concern: bool = True
@@ -295,6 +365,9 @@ def get_frozen_config() -> FrozenConfig:
         _frozen_config = FrozenConfig(
             model=manifest.batch_score_model,
             prompt_version=manifest.batch_score_prompt_version,
+            # PR2: Include prompt SSOT fields
+            prompt_id=manifest.batch_score_prompt_id,
+            prompt_hash=manifest.batch_score_prompt_hash,
             score_threshold=manifest.score_threshold,
             evidence_min_count=manifest.evidence_min_count,
             block_on_margin_concern=manifest.block_on_margin_concern,
@@ -311,6 +384,7 @@ def validate_runtime(
     batch_score_model: Optional[str] = None,
     full_audit_model: Optional[str] = None,
     prompt_version: Optional[str] = None,
+    prompt_hash: Optional[str] = None,  # PR2: Added prompt_hash validation
     score_threshold: Optional[float] = None,
     evidence_min_count: Optional[int] = None,
 ) -> bool:
@@ -319,6 +393,17 @@ def validate_runtime(
 
     This is the SSOT check that should be called at the start of any
     paper trading or production run.
+
+    PR2: Now also validates prompt_hash to ensure prompt content hasn't changed
+    even if version string remains the same.
+
+    Args:
+        batch_score_model: Model to validate
+        full_audit_model: Full audit model to validate
+        prompt_version: Prompt version string to validate
+        prompt_hash: PR2: SHA256 hash of prompt content to validate
+        score_threshold: Score threshold to validate
+        evidence_min_count: Evidence count to validate
 
     Raises:
         ValueError: If config doesn't match frozen manifest in frozen period.
@@ -347,6 +432,13 @@ def validate_runtime(
 
     if prompt_version and prompt_version != frozen.prompt_version:
         mismatches.append(f"prompt_version: {prompt_version} != {frozen.prompt_version}")
+
+    # PR2: Validate prompt_hash (critical for SSOT - catches content changes even if version stays same)
+    if prompt_hash and frozen.prompt_hash and prompt_hash != frozen.prompt_hash:
+        mismatches.append(
+            f"prompt_hash: {prompt_hash[:16]}... != {frozen.prompt_hash[:16]}... "
+            "(prompt content changed!)"
+        )
 
     if score_threshold is not None and score_threshold != frozen.score_threshold:
         mismatches.append(f"score_threshold: {score_threshold} != {frozen.score_threshold}")
