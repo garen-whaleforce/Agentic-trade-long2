@@ -174,7 +174,7 @@ paper-trading-status:
 leakage:
 	@echo "Checking for lookahead leakage..."
 	@echo "Scanning for prohibited patterns..."
-	cd backend && python -c "from guardrails.leakage_auditor import run_leakage_audit; r = run_leakage_audit(); print(f'Violations: {r.violations_found}, Critical: {r.critical_count}'); exit(0 if r.passed else 1)"
+	cd backend && python3 -c "from guardrails.leakage_auditor import run_leakage_audit; r = run_leakage_audit(verbose=True); print(f'Violations: {r.violations_found}, Critical: {r.critical_count}'); exit(0 if r.passed else 1)"
 	@echo "Leakage check complete"
 
 audit-leakage: leakage

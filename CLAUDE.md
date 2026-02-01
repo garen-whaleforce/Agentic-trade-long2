@@ -118,7 +118,7 @@ python -m backend.backtest.run_backtest --start 2017-01-01 --end 2025-12-31
 - `LITELLM_API_KEY`
 - `DATABASE_URL`
 
-## 9) Skills 清單
+## 9) Skills 清單（本地 Skills）
 
 | Skill ID | 用途 |
 |----------|------|
@@ -132,3 +132,422 @@ python -m backend.backtest.run_backtest --start 2017-01-01 --end 2025-12-31
 | `llm-routing-and-budget` | LLM 路由與預算 |
 | `model-selection-harness` | 模型選擇測試 |
 | `prompt-regression-suite` | Prompt 回歸測試 |
+
+---
+
+## 10) 外部服務 Skills（~/.claude/skills/）
+
+### 資料來源
+
+#### PostgreSQL Database（股價、Earnings Call、公司資訊）
+
+| Item | Value |
+|------|-------|
+| **Host** | `172.23.22.100` |
+| **Port** | `5432` |
+| **User** | `whaleforce` |
+| **Password** | (empty string) |
+| **Database** | `pead_reversal` |
+
+**主要資料表**：
+
+| 資料表 | 說明 | 資料範圍 |
+|--------|------|----------|
+| `historical_prices` | 股價 OHLCV | 2015-01 ~ today, 1,098,150 筆 |
+| `companies` | 公司基本資料 | S&P 500, 504 家 |
+| `earnings_surprises` | EPS Surprise | 2015 ~ today, 262,559 筆 |
+| `transcript_content` | Earnings Call 逐字稿 | 2015 Q1 ~ today, 16,953 筆 |
+
+```python
+import psycopg2
+import pandas as pd
+
+conn = psycopg2.connect(
+    host="172.23.22.100", port=5432,
+    user="whaleforce", password="", database="pead_reversal"
+)
+df = pd.read_sql("SELECT * FROM historical_prices WHERE symbol='AAPL' LIMIT 10", conn)
+```
+
+#### MinIO Storage（13F 機構持股 + 資料儲存）
+
+| Item | Value |
+|------|-------|
+| **API Endpoint** | `https://minio.api.gpu5090.whaleforce.dev` |
+| **Web UI** | `https://minio.gpu5090.whaleforce.dev` |
+| **Account** | `whaleforce` |
+| **Password** | `whaleforce.ai` |
+| **Default Bucket** | `13f` |
+| **資料範圍** | 2020 ~ 2025, ~23 GB |
+
+**可用 Bucket**：
+
+| Bucket | 用途 |
+|--------|------|
+| `13f` | 13F 機構持股資料 |
+| `rocket-screener` | 本專案回測結果、信號、artifacts |
+
+```python
+import boto3
+from botocore.client import Config
+import json
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url="https://minio.api.gpu5090.whaleforce.dev",
+    aws_access_key_id="whaleforce",
+    aws_secret_access_key="whaleforce.ai",
+    config=Config(signature_version="s3v4"),
+    verify=False
+)
+
+# ===== 讀取資料 =====
+
+# List 13F files
+response = s3.list_objects_v2(Bucket="13f", Prefix="2024/")
+for obj in response.get("Contents", [])[:5]:
+    print(obj['Key'])
+
+# Download file to local
+s3.download_file(Bucket="13f", Key="2024/0001067983/filing.json", Filename="local_filing.json")
+
+# Read file to memory
+response = s3.get_object(Bucket="13f", Key="2024/0001067983/filing.json")
+content = json.loads(response["Body"].read())
+
+# ===== 儲存資料 =====
+
+# Upload JSON data
+data = {"run_id": "abc123", "signals": [...], "metrics": {...}}
+s3.put_object(
+    Bucket="rocket-screener",
+    Key="runs/2026-02-01/run_config.json",
+    Body=json.dumps(data, indent=2),
+    ContentType="application/json"
+)
+
+# Upload local file
+s3.upload_file(
+    Filename="local_signals.csv",
+    Bucket="rocket-screener",
+    Key="runs/2026-02-01/signals.csv"
+)
+
+# Upload DataFrame as CSV
+import pandas as pd
+from io import StringIO
+
+df = pd.DataFrame({"symbol": ["AAPL", "MSFT"], "score": [0.85, 0.72]})
+csv_buffer = StringIO()
+df.to_csv(csv_buffer, index=False)
+s3.put_object(
+    Bucket="rocket-screener",
+    Key="runs/2026-02-01/signals.csv",
+    Body=csv_buffer.getvalue(),
+    ContentType="text/csv"
+)
+
+# Upload DataFrame as Parquet
+from io import BytesIO
+
+parquet_buffer = BytesIO()
+df.to_parquet(parquet_buffer, index=False)
+s3.put_object(
+    Bucket="rocket-screener",
+    Key="runs/2026-02-01/signals.parquet",
+    Body=parquet_buffer.getvalue(),
+    ContentType="application/octet-stream"
+)
+```
+
+**mc CLI 快速操作**：
+
+```bash
+# 設定 alias（一次性）
+mc alias set wf https://minio.api.gpu5090.whaleforce.dev whaleforce whaleforce.ai
+
+# 上傳檔案
+mc cp local_file.json wf/rocket-screener/runs/2026-02-01/
+
+# 上傳整個目錄
+mc mirror ./runs/abc123/ wf/rocket-screener/runs/abc123/
+
+# 下載檔案
+mc cp wf/13f/2024/0001067983/filing.json ./
+
+# 列出檔案
+mc ls wf/rocket-screener/runs/
+
+# 建立 bucket
+mc mb wf/new-bucket-name
+```
+
+---
+
+### LLM 服務
+
+#### LiteLLM（統一 LLM 代理）
+
+| Item | Value |
+|------|-------|
+| **Base URL** | `https://litellm.whaleforce.dev` |
+| **API Key** | 聯繫管理員取得 |
+
+**可用模型**：
+
+| 模型 | Provider | 用途 |
+|------|----------|------|
+| `gpt-4o-mini` | Azure | 快速評分（batch_score） |
+| `gpt-5` | Azure | 深度分析 |
+| `o3` | Azure | 推理任務 |
+| `claude-opus-4.5` | Open Router | 高品質分析 |
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-xxxxxxxx",
+    base_url="https://litellm.whaleforce.dev"
+)
+
+resp = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "分析 AAPL 最新財報"}],
+)
+print(resp.choices[0].message.content)
+```
+
+---
+
+### 回測服務
+
+#### Backtester API（SSOT 績效計算）
+
+| Item | Value |
+|------|-------|
+| **API URL** | `https://backtest.api.whaleforce.dev` |
+| **Frontend** | `https://backtest.whaleforce.dev` |
+
+**重要**：所有 CAGR、Sharpe、MDD 必須從此 API 取得，禁止自行計算！
+
+```python
+import requests
+
+BASE_URL = "https://backtest.api.whaleforce.dev"
+
+# 提交回測
+response = requests.post(f"{BASE_URL}/backtest/run", json={
+    "start_date": "2024-01-01T00:00:00Z",
+    "end_date": "2024-12-31T00:00:00Z",
+    "interval": "1d",
+    "initial_capital": 100000,
+    "base_currency": "USD",
+    "strategy_name": "weighted_rebalance",
+    "initial_portfolio": [
+        {"ticker": "AAPL", "weight": 0.5},
+        {"ticker": "MSFT", "weight": 0.5}
+    ]
+}, verify=False)
+
+backtest_id = response.json()["backtest_id"]
+
+# 取得結果
+result = requests.get(f"{BASE_URL}/backtest/result/{backtest_id}", verify=False).json()
+print(f"CAGR: {result['summary_metrics']['annualized_return_pct']:.2f}%")
+print(f"Sharpe: {result['summary_metrics']['sharpe_ratio']:.2f}")
+print(f"MDD: {result['summary_metrics']['max_drawdown_pct']:.2f}%")
+```
+
+---
+
+### 迭代與 Review 服務
+
+#### ChatGPT Pro API（深度分析與策略迭代）
+
+| Item | Value |
+|------|-------|
+| **API URL** | `https://chatgpt-pro.gpu5090.whaleforce.dev` |
+| **用途** | 策略迭代、深度 Review、複雜分析 |
+
+```python
+import requests
+
+API_URL = "https://chatgpt-pro.gpu5090.whaleforce.dev"
+
+# 提交分析任務
+response = requests.post(f"{API_URL}/chat", json={
+    "prompt": "Review 此策略的回測結果，找出潛在問題並建議改進方案",
+    "project": "rocket-screener"
+})
+task_id = response.json()["task_id"]
+
+# 等待結果（最多 60 秒）
+result = requests.get(f"{API_URL}/task/{task_id}?wait=60").json()
+if result["status"] == "completed":
+    print(result["answer"])
+```
+
+---
+
+### Earnings Call API
+
+| Item | Value |
+|------|-------|
+| **API URL** | `https://earningcall.gpu5090.whaleforce.dev` |
+| **API Docs** | `https://earningcall.gpu5090.whaleforce.dev/docs` |
+
+```python
+import requests
+
+BASE_URL = "https://earningcall.gpu5090.whaleforce.dev"
+
+# 取得逐字稿
+resp = requests.get(f"{BASE_URL}/api/company/AAPL/transcript", params={
+    "year": 2024, "quarter": 4, "level": 2
+})
+transcript = resp.json()
+```
+
+---
+
+## 11) 資料流與服務對應
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        資料來源（讀取）                           │
+├─────────────────────────────────────────────────────────────────┤
+│  PostgreSQL (172.23.22.100:5432)                                │
+│  ├── historical_prices → 股價 OHLCV                             │
+│  ├── companies → 公司基本資料                                    │
+│  ├── earnings_surprises → EPS Surprise                          │
+│  └── transcript_content → Earnings Call 逐字稿                  │
+│                                                                 │
+│  MinIO (minio.api.gpu5090.whaleforce.dev)                       │
+│  └── 13f/ → 機構持股 13F 資料                                    │
+│                                                                 │
+│  Earnings Call API (earningcall.gpu5090.whaleforce.dev)         │
+│  └── /api/company/{symbol}/transcript → 即時逐字稿               │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        LLM 分析                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  LiteLLM (litellm.whaleforce.dev)                               │
+│  ├── batch_score (gpt-4o-mini) → 快速評分 < $0.01/event         │
+│  └── full_audit (gpt-5) → 深度分析                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        回測驗證                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  Backtester API (backtest.api.whaleforce.dev)                   │
+│  └── SSOT: CAGR, Sharpe, MDD, Win Rate                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        策略迭代                                  │
+├─────────────────────────────────────────────────────────────────┤
+│  ChatGPT Pro API (chatgpt-pro.gpu5090.whaleforce.dev)           │
+│  └── 深度 Review、策略改進建議、複雜分析                          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        資料儲存（寫入）                           │
+├─────────────────────────────────────────────────────────────────┤
+│  MinIO (minio.api.gpu5090.whaleforce.dev)                       │
+│  └── rocket-screener/                                           │
+│      ├── runs/{run_id}/                                         │
+│      │   ├── run_config.json    → 執行配置                       │
+│      │   ├── signals.csv        → 交易信號                       │
+│      │   ├── trades.csv         → 交易記錄                       │
+│      │   ├── backtest_result.json → 回測結果                     │
+│      │   └── llm_responses/     → LLM 回應記錄                   │
+│      ├── models/                → 訓練好的模型                    │
+│      └── artifacts/             → 其他產出物                      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 12) 專案進度記錄
+
+> 記錄關鍵發現、工程進展、實驗結果。每次有重要變化時更新此章節。
+
+### 2026-02-01：6-PR 工程路線圖完成（113 測試通過）
+
+#### 完成項目
+
+| PR | 功能 | 測試數 | 關鍵檔案 |
+|---|---|---|---|
+| **PR1** | Leakage Auditor Allowlist | 7 | `backend/guardrails/leakage_auditor.py` |
+| **PR2** | Prompt SSOT + prompt_hash 凍結 | 11 | `backend/papertrading/freeze_policy.py` |
+| **PR3** | JSON 輸出健壯化 | 30 | `backend/llm/json_parser.py` |
+| **PR4** | Artifacts Schema | 17 | `backend/schemas/artifacts.py` |
+| **PR5** | Fail-Closed 機制 | 25 | `backend/papertrading/fail_closed.py` |
+| **PR6** | CLI 入口 + RUNBOOK 對齊 | 16 | `backend/papertrading/cli.py` |
+
+#### 新增模組說明
+
+1. **Leakage Auditor Allowlist (PR1)**
+   - `ALLOWLIST_PATTERNS`: 允許 result schema 變數（如 `return_pct`, `win_rate`）出現在特定檔案
+   - `include_patterns`: 縮小掃描範圍，避免誤報
+
+2. **Prompt SSOT (PR2)**
+   - `compute_prompt_hash()`: SHA256(system_prompt + user_template)
+   - `FreezeManifest.prompt_hash`: 凍結 prompt 版本
+   - `validate_runtime()`: 執行時驗證 prompt 一致性
+
+3. **JSON Parser (PR3)**
+   - `extract_json_from_markdown()`: 處理 ```json 包裹
+   - `fix_trailing_commas()`: 修復 LLM 常見錯誤
+   - `attempt_truncation_recovery()`: 嘗試修復截斷的 JSON
+   - `NO_TRADE_DEFAULT`: 解析失敗時的保守預設值
+
+4. **Artifacts Schema (PR4)**
+   - `RunManifest`: 執行配置（model, prompt, threshold）
+   - `SignalArtifact`: 個別信號（score, evidence, flags）
+   - `PositionArtifact`: 部位（entry/exit date, weight）
+   - `PerformanceArtifact`: 績效（SSOT from Whaleforce API）
+
+5. **Fail-Closed (PR5)**
+   - `PreRunValidator`: 執行前檢查（freeze_policy, prompt_hash, disk_space）
+   - `@fail_closed`: 裝飾器，錯誤時返回 NO_TRADE
+   - `HealthChecker`: 服務可用性檢查
+
+6. **CLI Entry Point (PR6)**
+   - `check-orders`: 檢查待處理訂單
+   - `daily-report`: 每日報告
+   - `weekly-report`: 每週報告
+   - `emergency-stop`: 緊急停止
+   - `status`: 系統狀態
+   - `validate`: 配置驗證
+
+#### CLI 使用方式
+
+```bash
+python -m backend.papertrading.cli check-orders
+python -m backend.papertrading.cli daily-report --date TODAY
+python -m backend.papertrading.cli weekly-report
+python -m backend.papertrading.cli emergency-stop
+python -m backend.papertrading.cli status
+python -m backend.papertrading.cli validate
+```
+
+#### 測試執行
+
+```bash
+# 執行所有 PR1-6 測試
+python3 -m pytest tests/guardrails/ tests/llm/ tests/papertrading/ tests/schemas/ -v
+```
+
+<!--
+格式範例：
+### YYYY-MM-DD：標題
+- 發現/變化描述
+- 實驗結果（如有）
+- 下一步行動
+-->
