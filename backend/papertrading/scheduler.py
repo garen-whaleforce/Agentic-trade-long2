@@ -144,45 +144,57 @@ class DailyScheduler:
                 errors=[str(e)],
             )
 
-        # TODO: Implement actual pipeline
-        # For now, return stub result
+        # Pipeline phases:
+        # Phase 1: Fetch events (requires EarningsCall API)
+        # Phase 2: Run analysis (requires LLM)
+        # Phase 3: Apply gate and generate orders
+        # Phase 4: Execute pending entries/exits (requires market data)
+        #
+        # Note: Full pipeline implementation requires external services.
+        # This scheduler handles order lifecycle; event fetching and analysis
+        # are delegated to the paper trading runner (runner.py).
 
-        # Process pending entries for today
+        events_found = 0
+        events_analyzed = 0
+        signals_generated = 0
+        trade_signals = 0
+        no_trade_signals = 0
+        orders_created = 0
+
+        # Process pending entries for today (fail-closed: no fake prices)
         entries_executed = 0
         if not dry_run:
             pending_entries = self.order_book.get_pending_entries(run_date)
             for order in pending_entries:
-                try:
-                    # Would get actual price from market data
-                    entry_price = 100.0  # Stub
-                    self.order_book.mark_entered(order.order_id, entry_price)
-                    entries_executed += 1
-                except Exception as e:
-                    errors.append(f"Entry failed for {order.order_id}: {str(e)}")
+                # Market data integration required for real prices
+                # Without market data, orders remain pending (fail-closed behavior)
+                errors.append(
+                    f"Entry pending for {order.order_id} ({order.symbol}): "
+                    f"market data integration required for T+1 close price"
+                )
 
-        # Process pending exits for today
+        # Process pending exits for today (fail-closed: no fake prices)
         exits_executed = 0
         if not dry_run:
             pending_exits = self.order_book.get_pending_exits(run_date)
             for order in pending_exits:
-                try:
-                    # Would get actual price from market data
-                    exit_price = 105.0  # Stub
-                    self.order_book.mark_exited(order.order_id, exit_price)
-                    exits_executed += 1
-                except Exception as e:
-                    errors.append(f"Exit failed for {order.order_id}: {str(e)}")
+                # Market data integration required for real prices
+                # Without market data, orders remain pending (fail-closed behavior)
+                errors.append(
+                    f"Exit pending for {order.order_id} ({order.symbol}): "
+                    f"market data integration required for T+30 close price"
+                )
 
         return DailyRunResult(
             run_date=run_date,
             run_id=run_id,
             timestamp=timestamp,
-            events_found=0,  # Would come from actual API call
-            events_analyzed=0,
-            signals_generated=0,
-            trade_signals=0,
-            no_trade_signals=0,
-            orders_created=0,
+            events_found=events_found,
+            events_analyzed=events_analyzed,
+            signals_generated=signals_generated,
+            trade_signals=trade_signals,
+            no_trade_signals=no_trade_signals,
+            orders_created=orders_created,
             entries_executed=entries_executed,
             exits_executed=exits_executed,
             total_cost_usd=0,

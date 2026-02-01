@@ -65,8 +65,8 @@ yarn-error.log*
 dist/
 *.js.map
 
-# Data and cache
-data/
+# Data and cache (root level only, not backend/data/)
+/data/
 *.db
 *.sqlite
 *.sqlite3
