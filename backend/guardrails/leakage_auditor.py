@@ -331,21 +331,32 @@ class LeakageAuditor:
 
 
 def run_leakage_audit(
-    codebase_path: str = "backend",
-    prompts_path: str = "backend/llm/prompts",
+    codebase_path: str = ".",
+    prompts_path: str = "llm/prompts",
 ) -> LeakageAuditResult:
     """
     Convenience function to run leakage audit.
 
+    NOTE: Default paths are relative to current working directory.
+    When running from Makefile (cd backend && ...), use defaults.
+    When running from project root, pass "backend" and "backend/llm/prompts".
+
     Args:
-        codebase_path: Path to codebase
-        prompts_path: Path to prompts
+        codebase_path: Path to codebase (default "." for running from backend/)
+        prompts_path: Path to prompts (default "llm/prompts" for running from backend/)
 
     Returns:
         LeakageAuditResult
     """
+    codebase = Path(codebase_path)
+    prompts = Path(prompts_path)
+
+    # Validate paths exist
+    if not codebase.exists():
+        raise ValueError(f"Codebase path does not exist: {codebase_path}")
+
     auditor = LeakageAuditor()
     return auditor.full_audit(
-        codebase_path=Path(codebase_path),
-        prompts_path=Path(prompts_path),
+        codebase_path=codebase,
+        prompts_path=prompts if prompts.exists() else None,
     )

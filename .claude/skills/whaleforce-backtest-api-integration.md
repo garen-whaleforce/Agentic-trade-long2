@@ -10,9 +10,11 @@
 
 ## API Endpoints
 
+**Note:** Paths are relative to `WHALEFORCE_BACKTEST_API_URL` base URL.
+
 ### 1. 執行回測
 ```
-POST /api/v1/backtest
+POST /backtest
 ```
 
 Request:
@@ -92,7 +94,7 @@ Response:
 
 ### 2. 取得 Trading Calendar
 ```
-GET /api/v1/trading-calendar?start=YYYY-MM-DD&end=YYYY-MM-DD
+GET /trading-calendar?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD
 ```
 
 Response:

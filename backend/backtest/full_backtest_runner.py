@@ -23,7 +23,11 @@ from pydantic import BaseModel
 from core.config import settings
 from core.trading_calendar import TradingCalendar, calculate_trading_dates
 from services.earningscall_client import EarningsCallClient
-from services.whaleforce_backtest_client import WhaleforceBacktestClient
+from services.whaleforce_backtest_client import (
+    WhaleforceBacktestClient,
+    Position,
+    BacktestConfig,
+)
 from llm.score_only_runner import ScoreOnlyRunner
 from signals.gate import SignalGate
 from signals.artifact_logger import ArtifactLogger, RunConfig
@@ -219,9 +223,9 @@ class FullBacktestRunner:
     def _apply_gate(
         self,
         signals: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+    ) -> List[Position]:
         """Apply trade decision gate to signals."""
-        positions = []
+        positions: List[Position] = []
 
         for signal in signals:
             if signal.get("error"):
@@ -234,16 +238,17 @@ class FullBacktestRunner:
             if gate_result.trade_long:
                 self.progress.trade_signals += 1
 
-                # Build position
+                # Build position as proper Position object
                 trading_dates = signal.get("trading_dates", {})
-                positions.append({
-                    "symbol": signal["event"]["symbol"],
-                    "entry_date": str(trading_dates.get("entry_date")),
-                    "exit_date": str(trading_dates.get("exit_date")),
-                    "direction": "long",
-                    "signal_id": signal["event_id"],
-                    "score": signal.get("score", 0),
-                })
+                position = Position(
+                    symbol=signal["event"]["symbol"],
+                    entry_date=str(trading_dates.get("entry_date")),
+                    exit_date=str(trading_dates.get("exit_date")),
+                    direction="long",
+                    signal_id=signal.get("event_id", signal["event"].get("event_id", "")),
+                    score=signal.get("score", 0.0),
+                )
+                positions.append(position)
             else:
                 self.progress.no_trade_signals += 1
 
@@ -251,7 +256,7 @@ class FullBacktestRunner:
 
     async def _submit_backtest(
         self,
-        positions: List[Dict[str, Any]],
+        positions: List[Position],
     ) -> Dict[str, Any]:
         """
         Submit positions to Whaleforce Backtest API.
@@ -259,34 +264,37 @@ class FullBacktestRunner:
         IMPORTANT: All performance metrics come from this API.
         Do NOT calculate them locally.
         """
-        # Log request
-        request = {
-            "strategy_id": self.config.run_id,
-            "positions": positions,
-            "config": {
-                "start_date": self.config.start_date,
-                "end_date": self.config.end_date,
-            },
-        }
-        self.logger.log_backtest_request(self.config.run_id, request)
-
-        # Submit to API
-        result = await self.backtest_client.run_backtest(
-            strategy_id=self.config.run_id,
-            positions=positions,
+        # Build backtest config
+        backtest_config = BacktestConfig(
             start_date=self.config.start_date,
             end_date=self.config.end_date,
         )
 
-        # Log result
-        self.logger.log_backtest_result(self.config.run_id, result)
+        # Log request
+        request = {
+            "strategy_id": self.config.run_id,
+            "positions": [p.model_dump() for p in positions],
+            "config": backtest_config.model_dump(),
+        }
+        self.logger.log_backtest_request(self.config.run_id, request)
 
-        return result
+        # Submit to API with correct signature
+        result = await self.backtest_client.run_backtest(
+            strategy_id=self.config.run_id,
+            positions=positions,
+            config=backtest_config,
+        )
+
+        # Log result - convert to dict if it's a model
+        result_dict = result.model_dump() if hasattr(result, "model_dump") else result
+        self.logger.log_backtest_result(self.config.run_id, result_dict)
+
+        return result_dict
 
     def _generate_report(
         self,
         signals: List[Dict[str, Any]],
-        positions: List[Dict[str, Any]],
+        positions: List[Position],
         backtest_result: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Generate final report."""

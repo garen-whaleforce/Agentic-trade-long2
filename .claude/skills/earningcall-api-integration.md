@@ -10,9 +10,11 @@
 
 ## API Endpoints
 
+**Note:** Paths are relative to `EARNINGSCALL_API_URL` base URL.
+
 ### 1. 取得日期的 Earnings Calls
 ```
-GET /api/v1/calendar?date=YYYY-MM-DD
+GET /calendar?date=YYYY-MM-DD
 ```
 
 Response:
@@ -35,7 +37,7 @@ Response:
 
 ### 2. 取得公司的 Earnings Call 歷史
 ```
-GET /api/v1/company/{symbol}/events?start=YYYY-MM-DD&end=YYYY-MM-DD
+GET /company/{symbol}/events?start=YYYY-MM-DD&end=YYYY-MM-DD
 ```
 
 Response:
@@ -57,7 +59,7 @@ Response:
 
 ### 3. 取得 Transcript
 ```
-GET /api/v1/transcript/{event_id}
+GET /transcript/{event_id}
 ```
 
 Response:

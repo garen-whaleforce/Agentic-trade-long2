@@ -9,7 +9,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 
 from pydantic import BaseModel
 
@@ -106,14 +106,16 @@ class ArtifactLogger:
     def log_signals(
         self,
         run_id: str,
-        signals: List[SignalOutput],
+        signals: List[Any],
     ) -> None:
         """
         Log signals to CSV.
 
+        Accepts both SignalOutput objects and dicts for flexibility.
+
         Args:
             run_id: Run identifier
-            signals: List of signal outputs
+            signals: List of signal outputs (SignalOutput or dict)
         """
         run_dir = self.base_dir / run_id
         filepath = run_dir / "signals.csv"
@@ -121,8 +123,22 @@ class ArtifactLogger:
         if not signals:
             return
 
-        # Get fieldnames from first signal
-        rows = [s.to_csv_row() for s in signals]
+        # Convert to rows - handle both SignalOutput and dict
+        rows = []
+        for s in signals:
+            if hasattr(s, "to_csv_row"):
+                rows.append(s.to_csv_row())
+            elif hasattr(s, "model_dump"):
+                rows.append(s.model_dump())
+            elif isinstance(s, dict):
+                rows.append(s)
+            else:
+                # Skip unknown types
+                continue
+
+        if not rows:
+            return
+
         fieldnames = list(rows[0].keys())
 
         with open(filepath, "w", newline="") as f:

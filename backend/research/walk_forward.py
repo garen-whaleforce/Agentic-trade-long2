@@ -296,3 +296,25 @@ class WalkForwardRunner:
 def get_walk_forward_runner() -> WalkForwardRunner:
     """Get a walk-forward runner instance."""
     return WalkForwardRunner()
+
+
+# Convenience alias for backward compatibility
+# Maps period names to date ranges as simple dict
+WALK_FORWARD_PERIODS = {
+    "tune": {
+        "start": "2017-01-01",
+        "end": "2021-12-31",
+    },
+    "validate": {
+        "start": "2022-01-01",
+        "end": "2023-12-31",
+    },
+    "final": {
+        "start": "2024-01-01",
+        "end": "2025-12-31",
+    },
+    "paper": {
+        "start": "2026-01-01",
+        "end": "2099-12-31",
+    },
+}
