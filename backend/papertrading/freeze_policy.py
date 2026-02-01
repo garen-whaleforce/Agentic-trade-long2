@@ -228,3 +228,64 @@ class FreezePolicy:
 def get_freeze_policy() -> FreezePolicy:
     """Get freeze policy instance."""
     return FreezePolicy()
+
+
+class FrozenConfig(BaseModel):
+    """Simplified frozen config for runtime use."""
+
+    model: str = "gpt-4o-mini"
+    prompt_version: str = "v1.0.0"
+    score_threshold: float = 0.70
+    evidence_min_count: int = 2
+    block_on_margin_concern: bool = True
+    is_frozen: bool = False
+
+
+# Global frozen config
+_frozen_config: Optional[FrozenConfig] = None
+
+
+def get_frozen_config() -> FrozenConfig:
+    """
+    Get the frozen configuration.
+
+    Returns:
+        FrozenConfig with current frozen settings
+    """
+    global _frozen_config
+
+    if _frozen_config is not None:
+        return _frozen_config
+
+    policy = get_freeze_policy()
+    manifest = policy.load_manifest()
+
+    if manifest is not None:
+        _frozen_config = FrozenConfig(
+            model=manifest.batch_score_model,
+            prompt_version=manifest.batch_score_prompt_version,
+            score_threshold=manifest.score_threshold,
+            evidence_min_count=manifest.evidence_min_count,
+            block_on_margin_concern=manifest.block_on_margin_concern,
+            is_frozen=True,
+        )
+    else:
+        # Default config if no manifest
+        _frozen_config = FrozenConfig()
+
+    return _frozen_config
+
+
+# Add convenience methods to FreezePolicy
+FreezePolicy.freeze = lambda self: self.create_manifest(
+    git_commit="HEAD",
+    batch_score_model="gpt-4o-mini",
+    full_audit_model="claude-3.5-sonnet",
+    batch_score_prompt_version="v1.0.0",
+    full_audit_prompt_version="v1.0.0",
+    score_threshold=0.70,
+    evidence_min_count=2,
+    block_on_margin_concern=True,
+)
+
+FreezePolicy.is_frozen = lambda self: self.has_manifest() and self.is_frozen_period()

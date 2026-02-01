@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from core.config import settings
 from schemas.llm_output import BatchScoreOutput
+from guardrails.evidence_rules import EvidenceValidator, validate_evidence
 
 
 class BlockReason(str, Enum):
@@ -215,3 +216,7 @@ def get_gate() -> DeterministicGate:
     if _gate is None:
         _gate = DeterministicGate()
     return _gate
+
+
+# Alias for backwards compatibility
+SignalGate = DeterministicGate

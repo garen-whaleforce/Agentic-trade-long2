@@ -224,3 +224,91 @@ class OrderBook:
                 writer.writerow(order.model_dump(mode="json"))
 
         return filepath
+
+    def open_position(
+        self,
+        symbol: str,
+        entry_date: date,
+        exit_date: date,
+        signal_id: str,
+        score: float,
+        run_id: str = "paper",
+        model: str = "gpt-4o-mini",
+        prompt_version: str = "v1.0.0",
+    ) -> PaperOrder:
+        """
+        Open a new paper position.
+
+        Args:
+            symbol: Stock symbol
+            entry_date: Entry date (T+1)
+            exit_date: Exit date (T+30)
+            signal_id: Signal identifier
+            score: Analysis score
+
+        Returns:
+            Created PaperOrder
+        """
+        import uuid
+
+        order_id = f"paper_{uuid.uuid4().hex[:8]}"
+
+        order = PaperOrder(
+            order_id=order_id,
+            signal_id=signal_id,
+            symbol=symbol,
+            event_date=entry_date,  # Approximate
+            entry_date=entry_date,
+            exit_date=exit_date,
+            score=score,
+            confidence=score,
+            status=OrderStatus.PENDING,
+            created_at=datetime.utcnow().isoformat(),
+            run_id=run_id,
+            model=model,
+            prompt_version=prompt_version,
+        )
+
+        self.add_order(order)
+        return order
+
+    def close_due_positions(self, as_of_date: date) -> List[PaperOrder]:
+        """
+        Close all positions due to exit on a given date.
+
+        Args:
+            as_of_date: Date to check for exits
+
+        Returns:
+            List of closed orders
+        """
+        due_orders = self.get_pending_exits(as_of_date)
+        closed = []
+
+        for order in due_orders:
+            # In real paper trading, would get actual exit price
+            # For now, mark as exited with placeholder
+            order.status = OrderStatus.CLOSED
+            order.exited_at = datetime.utcnow().isoformat()
+            closed.append(order)
+
+        if closed:
+            self._save_orders()
+
+        return closed
+
+
+# Alias for backwards compatibility
+PaperOrderBook = OrderBook
+
+
+# Global order book instance
+_order_book: Optional[OrderBook] = None
+
+
+def get_order_book() -> OrderBook:
+    """Get the global order book instance."""
+    global _order_book
+    if _order_book is None:
+        _order_book = OrderBook()
+    return _order_book

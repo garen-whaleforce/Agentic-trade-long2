@@ -9,7 +9,7 @@ Runs the daily paper trading pipeline:
 5. Schedule T+30 close exits
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import List, Optional, Dict, Any
 import uuid
 
@@ -213,6 +213,6 @@ class DailyScheduler:
             if is_trading_day(current):
                 result = await self.run_daily(run_date=current, dry_run=True)
                 results.append(result)
-            current = current.replace(day=current.day + 1)
+            current = current + timedelta(days=1)
 
         return results

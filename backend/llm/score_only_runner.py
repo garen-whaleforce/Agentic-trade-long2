@@ -197,36 +197,75 @@ JSON Schema:
             },
         )
 
-        # Call LLM (stub for now - would use litellm in real implementation)
+        # Call LLM via litellm
         start_time = time.time()
 
-        # TODO: Replace with actual LLM call via litellm
-        # For now, return a stub response
-        raw_output = {
-            "score": 0.75,
-            "trade_candidate": True,
-            "evidence_count": 2,
-            "key_flags": {
-                "guidance_positive": True,
-                "revenue_beat": True,
-                "margin_concern": False,
-                "guidance_raised": False,
-                "buyback_announced": False,
-            },
-            "evidence_snippets": [
-                {
-                    "quote": "We expect continued growth",
-                    "speaker": "CEO",
-                    "section": "prepared",
+        try:
+            import litellm
+
+            # Configure litellm
+            litellm.drop_params = True  # Drop unsupported params gracefully
+
+            messages = [
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": user_prompt},
+            ]
+
+            # Make actual API call
+            llm_response = await litellm.acompletion(
+                model=config.model,
+                messages=messages,
+                temperature=config.temperature,
+                max_tokens=config.max_output_tokens,
+                response_format={"type": "json_object"} if config.response_format == "json_object" else None,
+                timeout=30,
+            )
+
+            # Extract response content
+            raw_text = llm_response.choices[0].message.content
+            raw_output = json.loads(raw_text)
+
+            # Get actual token usage
+            input_tokens = llm_response.usage.prompt_tokens
+            output_tokens = llm_response.usage.completion_tokens
+
+        except ImportError:
+            # Fallback if litellm not installed - use stub for testing
+            raw_output = {
+                "score": 0.0,
+                "trade_candidate": False,
+                "evidence_count": 0,
+                "key_flags": {
+                    "guidance_positive": False,
+                    "revenue_beat": False,
+                    "margin_concern": False,
+                    "guidance_raised": False,
+                    "buyback_announced": False,
                 },
-                {
-                    "quote": "Revenue exceeded expectations",
-                    "speaker": "CFO",
-                    "section": "prepared",
+                "evidence_snippets": [],
+                "no_trade_reason": "LiteLLM not installed - stub response",
+            }
+            input_tokens = len(user_prompt) // 4
+            output_tokens = 100
+
+        except Exception as e:
+            # On any LLM error, return conservative NO_TRADE
+            raw_output = {
+                "score": 0.0,
+                "trade_candidate": False,
+                "evidence_count": 0,
+                "key_flags": {
+                    "guidance_positive": False,
+                    "revenue_beat": False,
+                    "margin_concern": False,
+                    "guidance_raised": False,
+                    "buyback_announced": False,
                 },
-            ],
-            "no_trade_reason": None,
-        }
+                "evidence_snippets": [],
+                "no_trade_reason": f"LLM error: {str(e)}",
+            }
+            input_tokens = len(user_prompt) // 4
+            output_tokens = 50
 
         latency_ms = int((time.time() - start_time) * 1000)
 
