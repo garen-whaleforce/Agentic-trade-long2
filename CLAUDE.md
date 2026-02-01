@@ -473,9 +473,43 @@ transcript = resp.json()
 
 ---
 
-## 12) 專案進度摘要
+## 12) 專案進度與決策記錄
 
-> 詳細記錄請見 `docs/decisions/` ADR 文件。
+### 記錄規則（Claude 必讀）
+
+**何時記錄？**
+- 完成重要功能或里程碑時
+- 做出架構/設計決策時
+- 變更 frozen parameters 時
+- 發現重要問題或 bug 時
+
+**如何記錄？**
+1. 建立 ADR 文件：`docs/decisions/ADR-{編號}-{簡短標題}.md`
+2. 更新下方進度表格（加在最上面）
+3. Commit 並 push
+
+**ADR 格式**：
+```markdown
+# ADR-XXX: 標題
+## Status: PROPOSED / APPROVED / COMPLETED / SUPERSEDED
+## Context: 為什麼需要這個決策
+## Decision: 決定了什麼
+## Consequences: 正面/負面影響
+```
+
+**如何查詢過去記錄？**
+```bash
+# 列出所有 ADR
+ls docs/decisions/
+
+# 搜尋特定關鍵字
+grep -r "關鍵字" docs/decisions/
+
+# 查看 git 歷史
+git log --oneline docs/decisions/
+```
+
+### 進度摘要
 
 | 日期 | 里程碑 | ADR |
 |------|--------|-----|
