@@ -11,6 +11,17 @@ from typing import List, Optional, Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from services.whaleforce_backtest_client import (
+    get_backtest_client,
+    BacktestAPIError,
+    APIConnectionError,
+    InvalidPositionError,
+    InsufficientDataError,
+    Position as WFPosition,
+    BacktestConfig as WFBacktestConfig,
+)
+from core.trading_calendar import get_trading_calendar
+
 router = APIRouter()
 
 
@@ -136,81 +147,108 @@ async def run_backtest(request: BacktestRequest) -> BacktestResponse:
     IMPORTANT: All performance metrics (CAGR, Sharpe, win rate, etc.)
     are returned by the API. Do NOT calculate them locally.
     """
-    # TODO: Implement actual API call to Whaleforce Backtest API
-    # This is a stub response for now
+    client = get_backtest_client()
 
-    return BacktestResponse(
-        backtest_id="bt_20260131_stub123",
-        strategy_id=request.strategy_id,
-        status="completed",
-        performance=PerformanceMetrics(
-            cagr=0.385,
-            sharpe_ratio=2.15,
-            sortino_ratio=2.85,
-            max_drawdown=-0.153,
-            win_rate=0.782,
-            profit_factor=2.34,
-            total_return=12.45,
-            annualized_volatility=0.18,
-        ),
-        trade_stats=TradeStats(
-            total_trades=847,
-            winning_trades=662,
-            losing_trades=185,
-            avg_win=0.082,
-            avg_loss=-0.045,
-            avg_holding_days=30,
-            trades_per_year=94,
-        ),
-        yearly_returns={
-            "2017": 0.42,
-            "2018": 0.28,
-            "2019": 0.51,
-            "2020": 0.38,
-            "2021": 0.45,
-            "2022": 0.22,
-            "2023": 0.35,
-            "2024": 0.41,
-            "2025": 0.33,
-        },
-        trades=[
-            Trade(
-                trade_id="t_001",
-                symbol="AAPL",
-                entry_date="2024-01-26",
-                entry_price=192.45,
-                exit_date="2024-03-08",
-                exit_price=215.30,
-                **{"return": 0.1187},
-                pnl=22850,
-            ),
-        ],
+    # Convert positions to Whaleforce format
+    wf_positions = [
+        WFPosition(
+            symbol=p.symbol,
+            entry_date=p.entry_date,
+            exit_date=p.exit_date,
+            direction=p.direction,
+            sizing=p.sizing,
+            signal_id=p.signal_id,
+            score=p.score,
+        )
+        for p in request.positions
+    ]
+
+    wf_config = WFBacktestConfig(
+        start_date=request.config.start_date,
+        end_date=request.config.end_date,
+        initial_capital=request.config.initial_capital,
+        commission_rate=request.config.commission_rate,
+        slippage_model=request.config.slippage_model,
+        slippage_bps=request.config.slippage_bps,
     )
+
+    try:
+        result = await client.run_backtest(
+            strategy_id=request.strategy_id,
+            positions=wf_positions,
+            config=wf_config,
+        )
+
+        # Map response to API schema
+        return BacktestResponse(
+            backtest_id=result.backtest_id,
+            strategy_id=result.strategy_id,
+            status=result.status,
+            performance=PerformanceMetrics(
+                cagr=result.performance.cagr,
+                sharpe_ratio=result.performance.sharpe_ratio,
+                sortino_ratio=result.performance.sortino_ratio,
+                max_drawdown=result.performance.max_drawdown,
+                win_rate=result.performance.win_rate,
+                profit_factor=result.performance.profit_factor,
+                total_return=result.performance.total_return,
+                annualized_volatility=result.performance.annualized_volatility,
+            ),
+            trade_stats=TradeStats(
+                total_trades=result.trade_stats.total_trades,
+                winning_trades=result.trade_stats.winning_trades,
+                losing_trades=result.trade_stats.losing_trades,
+                avg_win=result.trade_stats.avg_win,
+                avg_loss=result.trade_stats.avg_loss,
+                avg_holding_days=result.trade_stats.avg_holding_days,
+                trades_per_year=result.trade_stats.trades_per_year,
+            ),
+            yearly_returns=result.yearly_returns,
+            trades=[
+                Trade(
+                    trade_id=t.trade_id,
+                    symbol=t.symbol,
+                    entry_date=t.entry_date,
+                    entry_price=t.entry_price,
+                    exit_date=t.exit_date,
+                    exit_price=t.exit_price,
+                    **{"return": t.return_pct},
+                    pnl=t.pnl,
+                )
+                for t in result.trades
+            ],
+        )
+
+    except InvalidPositionError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except InsufficientDataError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except APIConnectionError as e:
+        raise HTTPException(status_code=503, detail=f"Backtest API unavailable: {str(e)}")
 
 
 @router.get("/trading-calendar", response_model=TradingCalendarResponse)
-async def get_trading_calendar(
+async def get_trading_calendar_endpoint(
     start_date: str,
     end_date: str,
 ) -> TradingCalendarResponse:
     """
-    Get trading calendar from Whaleforce API.
+    Get trading calendar.
 
     Returns list of trading days (excludes weekends and market holidays).
+    Uses pandas_market_calendars for accurate NYSE calendar.
     """
-    # TODO: Implement actual API call to Whaleforce API
-    # This is a stub response for now
+    try:
+        calendar = get_trading_calendar()
+        start = date.fromisoformat(start_date)
+        end = date.fromisoformat(end_date)
 
-    return TradingCalendarResponse(
-        trading_days=[
-            "2024-01-02",
-            "2024-01-03",
-            "2024-01-04",
-            "2024-01-05",
-            "2024-01-08",
-        ],
-        holidays=[
-            {"date": "2024-01-01", "name": "New Year's Day"},
-            {"date": "2024-01-15", "name": "Martin Luther King Jr. Day"},
-        ],
-    )
+        trading_days = calendar.get_trading_days_between(start, end)
+
+        return TradingCalendarResponse(
+            trading_days=[d.isoformat() for d in trading_days],
+            holidays=[],  # Can be extended to list holidays if needed
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")

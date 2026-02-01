@@ -10,6 +10,12 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
+from services.earningscall_client import (
+    get_earningscall_client,
+    EarningsCallAPIError,
+    EventNotFoundError,
+)
+
 router = APIRouter()
 
 
@@ -63,69 +69,66 @@ async def get_company_events(
 
     Returns a list of all earnings calls for the company within the date range.
     """
-    # TODO: Implement actual API call to EarningsCall API
-    # This is a stub response for now
-
+    ec_client = get_earningscall_client()
     symbol = symbol.upper()
 
-    # Stub data
-    events = []
-    for year in range(2017, 2026):
-        for quarter in range(1, 5):
-            month = (quarter - 1) * 3 + 1
-            event_date = f"{year}-{month:02d}-25"
-            events.append(
-                CompanyEvent(
-                    event_id=f"evt_{symbol.lower()}_{year}q{quarter}",
-                    fiscal_year=year,
-                    fiscal_quarter=quarter,
-                    event_date=event_date,
-                    transcript_available=True,
-                )
-            )
+    try:
+        # Parse dates if provided
+        parsed_start = date.fromisoformat(start_date) if start_date else None
+        parsed_end = date.fromisoformat(end_date) if end_date else None
 
-    return CompanyEventsResponse(
-        symbol=symbol,
-        company_name=f"{symbol} Inc.",
-        events=events,
-    )
+        response = await ec_client.get_company_events(
+            symbol=symbol,
+            start_date=parsed_start,
+            end_date=parsed_end,
+        )
+
+        return CompanyEventsResponse(
+            symbol=response.symbol,
+            company_name=response.company_name,
+            events=[
+                CompanyEvent(
+                    event_id=event.event_id,
+                    fiscal_year=event.fiscal_year,
+                    fiscal_quarter=event.fiscal_quarter,
+                    event_date=event.event_date,
+                    transcript_available=event.transcript_available,
+                )
+                for event in response.events
+            ],
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid date format: {str(e)}")
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail=f"No events found for symbol: {symbol}")
+    except EarningsCallAPIError as e:
+        raise HTTPException(status_code=503, detail=f"EarningsCall API error: {str(e)}")
 
 
 @router.get("/company/{symbol}", response_model=CompanyInfo)
 async def get_company_info(symbol: str) -> CompanyInfo:
     """
     Get basic information about a company.
-    """
-    # TODO: Implement actual API call
-    # This is a stub response for now
 
+    Derives company info from the most recent earnings event.
+    """
+    ec_client = get_earningscall_client()
     symbol = symbol.upper()
 
-    companies = {
-        "AAPL": CompanyInfo(
-            symbol="AAPL",
-            company_name="Apple Inc.",
-            sector="Technology",
-            industry="Consumer Electronics",
-        ),
-        "MSFT": CompanyInfo(
-            symbol="MSFT",
-            company_name="Microsoft Corporation",
-            sector="Technology",
-            industry="Software",
-        ),
-        "GOOGL": CompanyInfo(
-            symbol="GOOGL",
-            company_name="Alphabet Inc.",
-            sector="Technology",
-            industry="Internet Services",
-        ),
-    }
+    try:
+        # Get company events to derive company name
+        response = await ec_client.get_company_events(symbol=symbol)
 
-    if symbol in companies:
-        return companies[symbol]
+        return CompanyInfo(
+            symbol=response.symbol,
+            company_name=response.company_name,
+            # Note: sector/industry not available from EarningsCall API
+            sector=None,
+            industry=None,
+        )
 
-    return CompanyInfo(
-        symbol=symbol,
-        company_name=f"{symbol} Inc.",
-    )
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Company not found: {symbol}")
+    except EarningsCallAPIError as e:
+        raise HTTPException(status_code=503, detail=f"EarningsCall API error: {str(e)}")

@@ -5,7 +5,8 @@
         integ_s0 integ_s1 integ_s2 \
         eval_consistency_s1_k5 eval_cost_s2 \
         backtest_s3_quarter walkforward_tune walkforward_val final_test_lock \
-        paper_dryrun_10days leakage all
+        paper_dryrun_10days leakage all \
+        forbid-todo forbid-stub validate-runs
 
 # Default target
 help:
@@ -54,12 +55,14 @@ check: lint typecheck
 
 lint:
 	@echo "Running linter..."
-	cd backend && python -m ruff check . --fix --exit-non-zero-on-fix || python -m ruff check . 2>/dev/null || echo "ruff not installed, skipping lint"
+	@which ruff > /dev/null 2>&1 || (echo "ERROR: ruff not installed. Run: pip install ruff" && exit 1)
+	cd backend && python -m ruff check .
 	@echo "Lint complete"
 
 typecheck:
 	@echo "Running type checker..."
-	cd backend && python -m mypy . --ignore-missing-imports 2>/dev/null || echo "mypy not installed, skipping typecheck"
+	@which mypy > /dev/null 2>&1 || (echo "WARNING: mypy not installed, skipping typecheck" && exit 0)
+	cd backend && python -m mypy . --ignore-missing-imports
 	@echo "Type check complete"
 
 # =====================================
@@ -73,7 +76,7 @@ unit:
 
 contract:
 	@echo "Running contract tests..."
-	cd backend && python -m pytest ../tests/contract/ -v || echo "No contract tests yet"
+	@test -d tests/contract && cd backend && python -m pytest ../tests/contract/ -v || echo "No contract tests directory yet"
 	@echo "Contract tests complete"
 
 test: unit contract
@@ -148,7 +151,7 @@ final_test_lock:
 
 paper_dryrun_10days:
 	@echo "Running paper trading dry run (10 days)..."
-	cd backend && python -m backend.papertrading.runner || echo "Dry run simulation"
+	cd backend && python -m papertrading.runner
 	@echo "Dry run complete"
 
 enable-paper-trading:
@@ -171,7 +174,7 @@ paper-trading-status:
 leakage:
 	@echo "Checking for lookahead leakage..."
 	@echo "Scanning for prohibited patterns..."
-	cd backend && python -c "from guardrails.leakage_auditor import run_leakage_audit; r = run_leakage_audit(); print(f'Violations: {r.violations_found}, Critical: {r.critical_count}'); exit(0 if r.passed else 1)" || echo "Audit complete"
+	cd backend && python -c "from guardrails.leakage_auditor import run_leakage_audit; r = run_leakage_audit(); print(f'Violations: {r.violations_found}, Critical: {r.critical_count}'); exit(0 if r.passed else 1)"
 	@echo "Leakage check complete"
 
 audit-leakage: leakage
@@ -266,13 +269,33 @@ gate-all: gate-v1 gate-v2 gate-v3 gate-v4 gate-v5 gate-v6 gate-v10 gate-v11 gate
 test-unit: unit
 test-integration: integ_s0 integ_s1 integ_s2
 test-regression:
-	cd backend && python -m pytest ../tests/fixtures/ -v || echo "Regression tests"
+	cd backend && python -m pytest ../tests/fixtures/ -v
 test-consistency: eval_consistency_s1_k5
 test-cost: eval_cost_s2
+
+# =====================================
+# Code Quality Gates
+# =====================================
+
+forbid-todo:
+	@echo "Checking for forbidden TODO patterns in production code..."
+	@! grep -r "TODO.*Implement" backend/api/ backend/papertrading/ backend/backtest/ 2>/dev/null || (echo "ERROR: Found TODO:Implement in production code" && exit 1)
+	@echo "No forbidden TODOs found"
+
+forbid-stub:
+	@echo "Checking for stub patterns in production code..."
+	@! grep -rn "stub response" backend/api/ 2>/dev/null || (echo "ERROR: Found stub responses in API" && exit 1)
+	@! grep -rn "This is a stub" backend/api/ 2>/dev/null || (echo "ERROR: Found stub comments in API" && exit 1)
+	@echo "No stubs found"
+
+validate-runs:
+	@echo "Validating run artifacts..."
+	cd backend && python -m guardrails.validate_run
+	@echo "Run validation complete"
 
 # =====================================
 # All
 # =====================================
 
-all: check test gate-all leakage
+all: check test gate-all leakage forbid-stub
 	@echo "All checks and tests complete"

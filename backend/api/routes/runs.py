@@ -4,6 +4,7 @@ Runs endpoints.
 Provides access to run artifacts and history.
 """
 
+import csv
 from datetime import date
 from typing import List, Optional, Dict, Any
 from pathlib import Path
@@ -13,6 +14,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
+
+# Base directory for run artifacts
+RUNS_DIR = Path("runs")
 
 
 class RunSummary(BaseModel):
@@ -44,6 +48,60 @@ class RunsList(BaseModel):
     total: int
 
 
+def _load_json_file(filepath: Path) -> Optional[Dict[str, Any]]:
+    """Load a JSON file safely."""
+    if filepath.exists():
+        with open(filepath, "r") as f:
+            return json.load(f)
+    return None
+
+
+def _count_signals_from_csv(filepath: Path) -> tuple[int, int]:
+    """Count total and trade signals from CSV."""
+    if not filepath.exists():
+        return 0, 0
+
+    total = 0
+    trade_signals = 0
+    with open(filepath, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            total += 1
+            if row.get("trade_long", "").lower() == "true":
+                trade_signals += 1
+
+    return total, trade_signals
+
+
+def _load_signals_from_csv(filepath: Path, limit: int, offset: int, trade_only: bool) -> tuple[List[Dict], int]:
+    """Load signals from CSV with pagination."""
+    if not filepath.exists():
+        return [], 0
+
+    all_signals = []
+    with open(filepath, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Convert string values to appropriate types
+            signal = dict(row)
+            if "score" in signal:
+                signal["score"] = float(signal["score"])
+            if "confidence" in signal:
+                signal["confidence"] = float(signal["confidence"])
+            if "evidence_count" in signal:
+                signal["evidence_count"] = int(signal["evidence_count"])
+            if "trade_long" in signal:
+                signal["trade_long"] = signal["trade_long"].lower() == "true"
+
+            if trade_only and not signal.get("trade_long"):
+                continue
+            all_signals.append(signal)
+
+    total = len(all_signals)
+    paginated = all_signals[offset:offset + limit]
+    return paginated, total
+
+
 @router.get("/runs", response_model=RunsList)
 async def list_runs(
     limit: int = 20,
@@ -54,33 +112,55 @@ async def list_runs(
 
     Returns summary information for each run.
     """
-    # TODO: Implement actual file system reading
-    # This is a stub response
+    # Scan runs directory for run folders
+    runs = []
 
-    runs = [
-        RunSummary(
-            run_id="run_20260131_153022_backtest_2017_2025",
-            timestamp="2026-01-31T15:30:22Z",
-            purpose="backtest",
-            date_range={"start": "2017-01-01", "end": "2025-12-31"},
-            total_signals=847,
-            trade_signals=662,
-            models={"batch_score": "gpt-4o-mini"},
-            has_backtest=True,
-        ),
-        RunSummary(
-            run_id="run_20260130_091500_tune_2017_2021",
-            timestamp="2026-01-30T09:15:00Z",
-            purpose="tune",
-            date_range={"start": "2017-01-01", "end": "2021-12-31"},
-            total_signals=500,
-            trade_signals=380,
-            models={"batch_score": "gpt-4o-mini"},
-            has_backtest=True,
-        ),
-    ]
+    if not RUNS_DIR.exists():
+        return RunsList(runs=[], total=0)
 
-    return RunsList(runs=runs[offset : offset + limit], total=len(runs))
+    for run_dir in sorted(RUNS_DIR.iterdir(), reverse=True):
+        if not run_dir.is_dir():
+            continue
+
+        config_path = run_dir / "run_config.json"
+        config = _load_json_file(config_path)
+
+        if not config:
+            continue
+
+        # Load summary if available
+        summary_path = run_dir / "summary.json"
+        summary = _load_json_file(summary_path)
+
+        # Count signals if summary not available
+        total_signals, trade_signals = 0, 0
+        if summary:
+            total_signals = summary.get("signals_generated", summary.get("total_signals", 0))
+            trade_signals = summary.get("trade_signals", 0)
+        else:
+            signals_path = run_dir / "signals.csv"
+            total_signals, trade_signals = _count_signals_from_csv(signals_path)
+
+        # Check if backtest exists
+        has_backtest = (run_dir / "backtest_result.json").exists()
+
+        runs.append(
+            RunSummary(
+                run_id=config.get("run_id", run_dir.name),
+                timestamp=config.get("timestamp", ""),
+                purpose=config.get("purpose", "unknown"),
+                date_range=config.get("date_range", {}),
+                total_signals=total_signals,
+                trade_signals=trade_signals,
+                models=config.get("models", {}),
+                has_backtest=has_backtest,
+            )
+        )
+
+    total = len(runs)
+    paginated = runs[offset:offset + limit]
+
+    return RunsList(runs=paginated, total=total)
 
 
 @router.get("/runs/{run_id}", response_model=RunDetail)
@@ -88,44 +168,31 @@ async def get_run(run_id: str) -> RunDetail:
     """
     Get detailed information for a specific run.
     """
-    # TODO: Implement actual file system reading
-    # This is a stub response
+    run_dir = RUNS_DIR / run_id
+
+    if not run_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Run not found: {run_id}")
+
+    # Load config
+    config_path = run_dir / "run_config.json"
+    config = _load_json_file(config_path)
+
+    if not config:
+        raise HTTPException(status_code=404, detail=f"Run config not found: {run_id}")
+
+    # Load summary
+    summary_path = run_dir / "summary.json"
+    summary = _load_json_file(summary_path)
+
+    # Load backtest result
+    backtest_path = run_dir / "backtest_result.json"
+    backtest_result = _load_json_file(backtest_path)
 
     return RunDetail(
         run_id=run_id,
-        config={
-            "run_id": run_id,
-            "timestamp": "2026-01-31T15:30:22Z",
-            "purpose": "backtest",
-            "date_range": {"start": "2017-01-01", "end": "2025-12-31"},
-            "models": {"batch_score": "gpt-4o-mini", "full_audit": "gpt-5-mini"},
-            "prompt_versions": {"batch_score": "v1.2.0", "full_audit": "v1.1.0"},
-            "thresholds": {
-                "score_threshold": 0.70,
-                "evidence_min_count": 2,
-            },
-        },
-        summary={
-            "total_events": 1000,
-            "signals_generated": 847,
-            "trade_signals": 662,
-            "no_trade_signals": 185,
-            "total_cost_usd": 0.85,
-            "avg_latency_ms": 1850,
-        },
-        backtest_result={
-            "backtest_id": "bt_20260131_abc123",
-            "performance": {
-                "cagr": 0.385,
-                "sharpe_ratio": 2.15,
-                "win_rate": 0.782,
-                "max_drawdown": -0.153,
-            },
-            "trade_stats": {
-                "total_trades": 662,
-                "trades_per_year": 74,
-            },
-        },
+        config=config,
+        summary=summary,
+        backtest_result=backtest_result,
     )
 
 
@@ -139,38 +206,18 @@ async def get_run_signals(
     """
     Get signals from a specific run.
     """
-    # TODO: Implement actual CSV reading
-    # This is a stub response
+    run_dir = RUNS_DIR / run_id
 
-    signals = [
-        {
-            "event_id": "evt_aapl_2024q1",
-            "symbol": "AAPL",
-            "event_date": "2024-01-25",
-            "score": 0.82,
-            "trade_long": True,
-            "confidence": 0.78,
-            "evidence_count": 3,
-        },
-        {
-            "event_id": "evt_msft_2024q2",
-            "symbol": "MSFT",
-            "event_date": "2024-01-30",
-            "score": 0.45,
-            "trade_long": False,
-            "confidence": 0.42,
-            "evidence_count": 1,
-            "no_trade_reason": "score_below_threshold",
-        },
-    ]
+    if not run_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Run not found: {run_id}")
 
-    if trade_only:
-        signals = [s for s in signals if s.get("trade_long")]
+    signals_path = run_dir / "signals.csv"
+    signals, total = _load_signals_from_csv(signals_path, limit, offset, trade_only)
 
     return {
         "run_id": run_id,
-        "signals": signals[offset : offset + limit],
-        "total": len(signals),
+        "signals": signals,
+        "total": total,
     }
 
 
@@ -179,33 +226,25 @@ async def get_llm_details(run_id: str, event_id: str) -> Dict[str, Any]:
     """
     Get LLM request/response details for a specific event.
     """
-    # TODO: Implement actual file reading
-    # This is a stub response
+    run_dir = RUNS_DIR / run_id
+
+    if not run_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Run not found: {run_id}")
+
+    # Load request
+    request_path = run_dir / "llm_requests" / f"{event_id}_request.json"
+    request_data = _load_json_file(request_path)
+
+    # Load response
+    response_path = run_dir / "llm_responses" / f"{event_id}_response.json"
+    response_data = _load_json_file(response_path)
+
+    if not request_data and not response_data:
+        raise HTTPException(status_code=404, detail=f"LLM data not found for event: {event_id}")
 
     return {
         "run_id": run_id,
         "event_id": event_id,
-        "request": {
-            "model": "gpt-4o-mini",
-            "prompt_template_id": "batch_score_v1.2.0",
-            "prompt_hash": "sha256:abc123def456",
-            "rendered_prompt": "Analyze the following earnings call transcript...",
-            "parameters": {
-                "temperature": 0,
-                "max_tokens": 500,
-            },
-        },
-        "response": {
-            "raw_output": {
-                "score": 0.82,
-                "trade_candidate": True,
-                "evidence_count": 3,
-                "evidence_snippets": [
-                    {"quote": "We expect 15-18% growth", "speaker": "CFO"},
-                ],
-            },
-            "token_usage": {"input": 2500, "output": 350, "total": 2850},
-            "cost_usd": 0.00058,
-            "latency_ms": 1850,
-        },
+        "request": request_data,
+        "response": response_data,
     }

@@ -276,6 +276,93 @@ def get_frozen_config() -> FrozenConfig:
     return _frozen_config
 
 
+def validate_runtime(
+    batch_score_model: Optional[str] = None,
+    full_audit_model: Optional[str] = None,
+    prompt_version: Optional[str] = None,
+    score_threshold: Optional[float] = None,
+    evidence_min_count: Optional[int] = None,
+) -> bool:
+    """
+    Validate runtime configuration against freeze policy.
+
+    This is the SSOT check that should be called at the start of any
+    paper trading or production run.
+
+    Raises:
+        ValueError: If config doesn't match frozen manifest in frozen period.
+
+    Returns:
+        True if validation passes.
+    """
+    policy = get_freeze_policy()
+
+    # If not in frozen period, allow any config
+    if not policy.is_frozen_period():
+        return True
+
+    # Get frozen config
+    frozen = get_frozen_config()
+    if not frozen.is_frozen:
+        raise ValueError(
+            "In frozen period but no freeze manifest exists. "
+            "Run: make enable-paper-trading"
+        )
+
+    mismatches = []
+
+    if batch_score_model and batch_score_model != frozen.model:
+        mismatches.append(f"batch_score_model: {batch_score_model} != {frozen.model}")
+
+    if prompt_version and prompt_version != frozen.prompt_version:
+        mismatches.append(f"prompt_version: {prompt_version} != {frozen.prompt_version}")
+
+    if score_threshold is not None and score_threshold != frozen.score_threshold:
+        mismatches.append(f"score_threshold: {score_threshold} != {frozen.score_threshold}")
+
+    if evidence_min_count is not None and evidence_min_count != frozen.evidence_min_count:
+        mismatches.append(f"evidence_min_count: {evidence_min_count} != {frozen.evidence_min_count}")
+
+    if mismatches:
+        raise ValueError(
+            f"Configuration mismatch in frozen period. "
+            f"Mismatches: {'; '.join(mismatches)}. "
+            f"To change, delete manifest, document in ADR, and rerun walk-forward."
+        )
+
+    return True
+
+
+def require_frozen() -> FrozenConfig:
+    """
+    Ensure we're in frozen period with valid config.
+
+    This is the recommended way to get frozen config in paper trading.
+    It will raise if not properly frozen.
+
+    Returns:
+        FrozenConfig that is guaranteed to be frozen.
+
+    Raises:
+        ValueError: If not in frozen period or manifest is missing.
+    """
+    policy = get_freeze_policy()
+
+    if not policy.is_frozen_period():
+        raise ValueError(
+            f"Not in frozen period. Paper trading requires date >= {policy.freeze_boundary}"
+        )
+
+    frozen = get_frozen_config()
+    if not frozen.is_frozen:
+        raise ValueError(
+            "In frozen period but no freeze manifest exists. "
+            "Run: make enable-paper-trading"
+        )
+
+    return frozen
+
+
 # Add convenience methods to FreezePolicy
 FreezePolicy.freeze = lambda self: self.create_manifest(
     git_commit="HEAD",

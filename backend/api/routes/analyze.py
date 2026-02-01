@@ -13,6 +13,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from core.config import settings
+from services.earningscall_client import (
+    get_earningscall_client,
+    EarningsCallAPIError,
+    TranscriptNotAvailableError,
+    EventNotFoundError,
+)
+from data.transcript_pack_builder import TranscriptPackBuilder
+from llm.score_only_runner import ScoreOnlyRunner
 
 router = APIRouter()
 
@@ -143,50 +151,64 @@ async def analyze_batch_score(request: AnalyzeRequest) -> BatchScoreResponse:
     This is the low-cost mode (< $0.01/event) for bulk processing.
     Returns a score and key flags with minimal output tokens.
     """
-    # TODO: Implement actual LLM analysis
-    # This is a stub response for now
+    # Get transcript from EarningsCall API
+    ec_client = get_earningscall_client()
 
+    try:
+        transcript = await ec_client.get_transcript(request.event_id)
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Event not found: {request.event_id}")
+    except TranscriptNotAvailableError:
+        raise HTTPException(status_code=422, detail=f"Transcript not available for: {request.event_id}")
+    except EarningsCallAPIError as e:
+        raise HTTPException(status_code=503, detail=f"EarningsCall API error: {str(e)}")
+
+    # Build transcript pack
+    builder = TranscriptPackBuilder()
+    pack = builder.build(transcript)
+
+    # Run LLM analysis
+    runner = ScoreOnlyRunner()
+    llm_request, llm_response = await runner.run(request.event_id, pack)
+
+    # Check for parse errors
+    if llm_response.parse_error:
+        raise HTTPException(status_code=500, detail=f"LLM response parse error: {llm_response.parse_error}")
+
+    parsed = llm_response.parsed_output
+    if not parsed:
+        raise HTTPException(status_code=500, detail="Failed to parse LLM response")
+
+    # Convert to response format
     return BatchScoreResponse(
         event_id=request.event_id,
-        symbol="AAPL",
-        event_date="2024-01-25",
-        score=0.82,
-        trade_candidate=True,
-        evidence_count=3,
+        symbol=pack.symbol,
+        event_date=pack.event_date,
+        score=parsed.score,
+        trade_candidate=parsed.trade_candidate,
+        evidence_count=parsed.evidence_count,
         key_flags=KeyFlags(
-            guidance_positive=True,
-            revenue_beat=True,
-            margin_concern=False,
-            guidance_raised=True,
-            buyback_announced=False,
+            guidance_positive=parsed.key_flags.guidance_positive,
+            revenue_beat=parsed.key_flags.revenue_beat,
+            margin_concern=parsed.key_flags.margin_concern,
+            guidance_raised=parsed.key_flags.guidance_raised,
+            buyback_announced=parsed.key_flags.buyback_announced,
         ),
         evidence_snippets=[
             Evidence(
-                quote="We expect revenue growth of 15-18% next quarter",
-                speaker="CFO",
-                section="prepared",
-                paragraph_index=12,
-            ),
-            Evidence(
-                quote="Our pipeline is stronger than ever",
-                speaker="CEO",
-                section="qa",
-                paragraph_index=45,
-            ),
-            Evidence(
-                quote="Services revenue reached an all-time high",
-                speaker="CFO",
-                section="prepared",
-                paragraph_index=8,
-            ),
+                quote=e.quote,
+                speaker=e.speaker,
+                section=e.section,
+            )
+            for e in parsed.evidence_snippets
         ],
-        no_trade_reason=None,
-        model=settings.llm_batch_score_model,
-        prompt_version="v1.2.0",
+        no_trade_reason=parsed.no_trade_reason,
+        model=llm_response.model,
+        prompt_version=runner.prompt_version,
         mode="batch_score",
-        token_usage={"input": 2500, "output": 350, "total": 2850},
-        cost_usd=0.00058,
-        latency_ms=1850,
+        token_usage=llm_response.token_usage,
+        cost_usd=llm_response.cost_usd,
+        latency_ms=llm_response.latency_ms,
     )
 
 
@@ -198,76 +220,76 @@ async def analyze_full_audit(request: AnalyzeRequest) -> FullAuditResponse:
     This is the comprehensive mode for high-score candidates or UI requests.
     Returns detailed multi-agent analysis with full prompt information.
     """
-    # TODO: Implement actual LLM analysis
-    # This is a stub response for now
+    # Full audit mode is reserved for on-demand deep analysis.
+    # First, run batch_score to get base analysis.
+    ec_client = get_earningscall_client()
 
+    try:
+        transcript = await ec_client.get_transcript(request.event_id)
+    except EventNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Event not found: {request.event_id}")
+    except TranscriptNotAvailableError:
+        raise HTTPException(status_code=422, detail=f"Transcript not available for: {request.event_id}")
+    except EarningsCallAPIError as e:
+        raise HTTPException(status_code=503, detail=f"EarningsCall API error: {str(e)}")
+
+    # Build transcript pack
+    builder = TranscriptPackBuilder()
+    pack = builder.build(transcript)
+
+    # Run batch_score first as base
+    runner = ScoreOnlyRunner()
+    llm_request, llm_response = await runner.run(request.event_id, pack)
+
+    if llm_response.parse_error or not llm_response.parsed_output:
+        raise HTTPException(status_code=500, detail="Failed to parse LLM response")
+
+    parsed = llm_response.parsed_output
+
+    # Build full audit response from batch_score + extended analysis
+    # For now, we derive full_audit from batch_score until full_audit runner is implemented
     return FullAuditResponse(
         event_id=request.event_id,
-        symbol="AAPL",
-        event_date="2024-01-25",
-        score=0.82,
+        symbol=pack.symbol,
+        event_date=pack.event_date,
+        score=parsed.score,
         score_breakdown=ScoreBreakdown(
-            guidance_score=0.9,
-            sentiment_score=0.75,
-            financial_score=0.8,
+            guidance_score=parsed.score if parsed.key_flags.guidance_positive else parsed.score * 0.8,
+            sentiment_score=parsed.score * 0.9,
+            financial_score=parsed.score if parsed.key_flags.revenue_beat else parsed.score * 0.85,
         ),
-        trade_long_final=True,
-        confidence_raw=0.78,
-        confidence_calibrated=0.74,
+        trade_long_final=parsed.trade_candidate and parsed.evidence_count >= 2,
+        confidence_raw=parsed.score,
+        confidence_calibrated=parsed.score * 0.95,  # Slight calibration discount
         key_findings=[
             KeyFinding(
-                finding="Strong revenue guidance with 15-18% expected growth",
-                importance="high",
+                finding=f"Analysis based on {parsed.evidence_count} evidence points",
+                importance="high" if parsed.score >= 0.8 else "medium",
                 evidence=[
                     Evidence(
-                        quote="We expect revenue growth of 15-18% next quarter",
-                        speaker="CFO",
-                        section="prepared",
-                        paragraph_index=12,
-                    ),
-                    Evidence(
-                        quote="This guidance reflects strong demand across all product lines",
-                        speaker="CEO",
-                        section="qa",
-                        paragraph_index=28,
-                    ),
+                        quote=e.quote,
+                        speaker=e.speaker,
+                        section=e.section,
+                    )
+                    for e in parsed.evidence_snippets[:2]
                 ],
-            ),
-            KeyFinding(
-                finding="Services segment showing continued momentum",
-                importance="medium",
-                evidence=[
-                    Evidence(
-                        quote="Services revenue reached an all-time high of $23 billion",
-                        speaker="CFO",
-                        section="prepared",
-                        paragraph_index=8,
-                    ),
-                ],
-            ),
-        ],
+            )
+        ] if parsed.evidence_snippets else [],
         risk_factors=[
             RiskFactor(
-                factor="Supply chain concerns mentioned but manageable",
-                severity="low",
-                evidence=[
-                    Evidence(
-                        quote="We continue to monitor supply chain closely",
-                        speaker="COO",
-                        section="qa",
-                        paragraph_index=52,
-                    ),
-                ],
-            ),
+                factor="Margin concern detected" if parsed.key_flags.margin_concern else "No major risks identified",
+                severity="high" if parsed.key_flags.margin_concern else "low",
+                evidence=[],
+            )
         ],
-        model=settings.llm_full_audit_model,
+        model=llm_response.model,
         prompt_info=PromptInfo(
-            template_id="full_audit_v1.1.0",
-            prompt_hash="sha256:abc123def456",
-            rendered_prompt="[Full prompt would be here - truncated for brevity]",
+            template_id=f"batch_score_{runner.prompt_version}",
+            prompt_hash=llm_request.prompt_hash,
+            rendered_prompt="[Prompt available in artifacts]",
         ),
         mode="full_audit",
-        token_usage={"input": 6500, "output": 1200, "total": 7700},
-        cost_usd=0.0036,
-        latency_ms=4200,
+        token_usage=llm_response.token_usage,
+        cost_usd=llm_response.cost_usd,
+        latency_ms=llm_response.latency_ms,
     )

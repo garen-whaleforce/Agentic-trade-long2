@@ -21,12 +21,12 @@ from typing import Dict, Any, List, Optional
 from pydantic import BaseModel
 
 from core.config import settings
-from core.trading_calendar import TradingCalendar, is_trading_day
+from core.trading_calendar import TradingCalendar, is_trading_day, calculate_trading_dates
 from services.earningscall_client import EarningsCallClient
 from llm.score_only_runner import ScoreOnlyRunner
 from signals.gate import SignalGate
 from signals.artifact_logger import ArtifactLogger, RunConfig
-from .freeze_policy import FreezePolicy, get_frozen_config
+from .freeze_policy import FreezePolicy, get_frozen_config, require_frozen, validate_runtime
 from .order_book import PaperOrderBook, get_order_book
 from .monitoring import (
     get_metrics,
@@ -90,9 +90,14 @@ class PaperTradingRunner:
         self.metrics = get_metrics()
         self.alerts = get_alerts()
 
-        # Load frozen config
-        self.frozen = get_frozen_config()
+        # Load frozen config (strict mode for paper trading)
         self.freeze_policy = FreezePolicy()
+        # In paper trading, we require frozen config
+        try:
+            self.frozen = require_frozen()
+        except ValueError:
+            # Allow non-frozen for testing/dry-run, but will fail at runtime check
+            self.frozen = get_frozen_config()
 
         # Initialize analyzer with frozen settings
         self.analyzer = ScoreOnlyRunner(
@@ -141,15 +146,22 @@ class PaperTradingRunner:
                 result.status = "skipped_non_trading_day"
                 return result
 
-            # Check freeze policy
-            if not self.freeze_policy.is_frozen():
+            # Check freeze policy - validate runtime configuration matches frozen manifest
+            try:
+                validate_runtime(
+                    batch_score_model=self.frozen.model,
+                    prompt_version=self.frozen.prompt_version,
+                    score_threshold=self.frozen.score_threshold,
+                    evidence_min_count=self.frozen.evidence_min_count,
+                )
+            except ValueError as e:
                 self.alerts.raise_alert(
                     AlertSeverity.CRITICAL,
                     "Freeze Policy Violation",
-                    "Paper trading attempted but configuration is not frozen",
+                    str(e),
                 )
                 result.status = "error_not_frozen"
-                result.errors.append("Configuration not frozen")
+                result.errors.append(str(e))
                 return result
 
             # Create run directory
@@ -307,10 +319,13 @@ class PaperTradingRunner:
         """Open a paper trading position."""
         try:
             event = signal["event"]
-            entry_date = self.calendar.next_trading_day(
-                date.fromisoformat(event["event_date"])
-            )
-            exit_date = self.calendar.add_trading_days(entry_date, 30)
+            event_date = date.fromisoformat(event["event_date"])
+
+            # Use SSOT trading calendar for correct date calculation
+            # Entry = T+1 close, Exit = T+30 close (from T, not from entry)
+            trading_dates = calculate_trading_dates(event_date)
+            entry_date = trading_dates["entry_date"]
+            exit_date = trading_dates["exit_date"]
 
             position = self.order_book.open_position(
                 symbol=event["symbol"],
