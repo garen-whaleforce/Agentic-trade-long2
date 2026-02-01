@@ -311,6 +311,53 @@ class EarningsCallClient:
         except httpx.RequestError as e:
             raise APIConnectionError(f"Connection error: {str(e)}")
 
+    async def get_events_in_range(
+        self,
+        start_date: str,
+        end_date: str,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get all earnings events in a date range.
+
+        Iterates through each day in the range and aggregates events.
+
+        Args:
+            start_date: Start date (YYYY-MM-DD)
+            end_date: End date (YYYY-MM-DD)
+
+        Returns:
+            List of event dictionaries
+        """
+        from datetime import datetime, timedelta
+
+        start = datetime.fromisoformat(start_date).date()
+        end = datetime.fromisoformat(end_date).date()
+
+        all_events = []
+        current = start
+
+        while current <= end:
+            try:
+                calendar = await self.get_calendar(current)
+                for event in calendar.events:
+                    all_events.append({
+                        "event_id": event.event_id,
+                        "symbol": event.symbol,
+                        "company_name": event.company_name,
+                        "fiscal_year": event.fiscal_year,
+                        "fiscal_quarter": event.fiscal_quarter,
+                        "event_date": event.event_date,
+                        "event_time": event.event_time,
+                        "transcript_available": event.transcript_available,
+                    })
+            except APIConnectionError:
+                # Skip days with API errors
+                pass
+
+            current += timedelta(days=1)
+
+        return all_events
+
 
 # =====================================
 # Singleton instance

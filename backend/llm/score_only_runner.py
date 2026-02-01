@@ -8,7 +8,7 @@ import hashlib
 import json
 import time
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 
 from pydantic import BaseModel, ValidationError
 
@@ -95,6 +95,7 @@ JSON Schema:
 
     def __init__(
         self,
+        model: Optional[str] = None,
         router: Optional[LLMRouter] = None,
         prompt_version: str = "v1.0.0",
     ):
@@ -102,11 +103,13 @@ JSON Schema:
         Initialize the runner.
 
         Args:
+            model: Override model (optional, uses router default if not set)
             router: LLM router instance
             prompt_version: Version of the prompt
         """
         self.router = router or get_llm_router()
         self.prompt_version = prompt_version
+        self._model_override = model
 
     def _render_prompt(self, pack: TranscriptPack) -> str:
         """Render the user prompt with transcript pack."""
@@ -177,6 +180,18 @@ JSON Schema:
             Tuple of (LLMRequest, LLMResponse)
         """
         config = self.router.get_config("batch_score", self.prompt_version)
+
+        # Override model if specified
+        if self._model_override:
+            config = LLMConfig(
+                model=self._model_override,
+                temperature=config.temperature,
+                max_input_tokens=config.max_input_tokens,
+                max_output_tokens=config.max_output_tokens,
+                cost_per_1k_input=config.cost_per_1k_input,
+                cost_per_1k_output=config.cost_per_1k_output,
+                response_format=config.response_format,
+            )
 
         # Render prompt
         user_prompt = self._render_prompt(pack)
@@ -277,10 +292,8 @@ JSON Schema:
             parsed_output = None
             parse_error = str(e)
 
-        # Estimate tokens (stub)
-        input_tokens = len(user_prompt) // 4
-        output_tokens = 200
-
+        # Use actual token counts from LLM response (already set above)
+        # Only fallback to estimation if tokens weren't set by the LLM call
         cost = self.router.calculate_cost(config, input_tokens, output_tokens)
 
         # Create response record
@@ -301,6 +314,56 @@ JSON Schema:
         )
 
         return request, response
+
+
+    async def analyze(
+        self,
+        event_id: str,
+        transcript: Any,
+        mode: str = "batch_score",
+    ) -> Dict[str, Any]:
+        """
+        Analyze an earnings call transcript.
+
+        This is the unified interface for all callers.
+
+        Args:
+            event_id: Event identifier
+            transcript: TranscriptResponse or TranscriptPack
+            mode: Analysis mode (batch_score or full_audit)
+
+        Returns:
+            Dict with score, trade_candidate, evidence, etc.
+        """
+        from data.transcript_pack_builder import TranscriptPackBuilder, TranscriptPack
+
+        # Convert transcript to pack if needed
+        if isinstance(transcript, TranscriptPack):
+            pack = transcript
+        else:
+            # Build pack from transcript response
+            builder = TranscriptPackBuilder()
+            pack = builder.build(transcript)
+
+        # Run analysis
+        request, response = await self.run(event_id, pack)
+
+        # Return dict format for compatibility
+        result = {
+            "event_id": event_id,
+            "score": response.parsed_output.score if response.parsed_output else 0.0,
+            "trade_candidate": response.parsed_output.trade_candidate if response.parsed_output else False,
+            "evidence_count": response.parsed_output.evidence_count if response.parsed_output else 0,
+            "key_flags": response.parsed_output.key_flags.model_dump() if response.parsed_output else {},
+            "evidence_snippets": [e.model_dump() for e in response.parsed_output.evidence_snippets] if response.parsed_output else [],
+            "no_trade_reason": response.parsed_output.no_trade_reason if response.parsed_output else response.parse_error,
+            "cost_usd": response.cost_usd,
+            "latency_ms": response.latency_ms,
+            "model": response.model,
+            "prompt_version": self.prompt_version,
+        }
+
+        return result
 
 
 async def run_batch_score(

@@ -12,11 +12,14 @@ from typing import List, Tuple
 import pytest
 
 
-# Directories to scan for stubs
+# Get the project root directory (parent of tests/)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# Directories to scan for stubs (relative to project root)
 PRODUCTION_DIRS = [
-    "backend/api/routes",
-    "backend/papertrading",
-    "backend/backtest",
+    PROJECT_ROOT / "backend" / "api" / "routes",
+    PROJECT_ROOT / "backend" / "papertrading",
+    PROJECT_ROOT / "backend" / "backtest",
 ]
 
 # Patterns that indicate stub/unimplemented code
@@ -61,7 +64,7 @@ def find_stub_patterns(file_path: Path) -> List[Tuple[int, str, str]]:
     return violations
 
 
-def scan_directory(directory: str) -> List[Tuple[str, int, str, str]]:
+def scan_directory(directory: Path) -> List[Tuple[str, int, str, str]]:
     """
     Scan a directory for stub patterns.
 
@@ -69,7 +72,7 @@ def scan_directory(directory: str) -> List[Tuple[str, int, str, str]]:
         List of (filepath, line_number, pattern_name, line_content) tuples
     """
     all_violations = []
-    base_path = Path(directory)
+    base_path = Path(directory) if isinstance(directory, str) else directory
 
     if not base_path.exists():
         return []
@@ -91,7 +94,7 @@ class TestNoStubs:
 
     def test_api_routes_no_stubs(self):
         """API routes should not contain stub responses."""
-        violations = scan_directory("backend/api/routes")
+        violations = scan_directory(PROJECT_ROOT / "backend" / "api" / "routes")
 
         if violations:
             msg = "Found stub patterns in API routes:\n"
@@ -101,7 +104,7 @@ class TestNoStubs:
 
     def test_papertrading_no_stubs(self):
         """Paper trading code should not contain stubs."""
-        violations = scan_directory("backend/papertrading")
+        violations = scan_directory(PROJECT_ROOT / "backend" / "papertrading")
 
         # Filter out allowed stubs (e.g., dry run mode stubs)
         filtered = [v for v in violations if "dry_run" not in v[3].lower()]
@@ -114,7 +117,7 @@ class TestNoStubs:
 
     def test_backtest_no_stubs(self):
         """Backtest code should not contain stubs."""
-        violations = scan_directory("backend/backtest")
+        violations = scan_directory(PROJECT_ROOT / "backend" / "backtest")
 
         # Filter out allowed stubs (e.g., dry run mode)
         filtered = [v for v in violations if "dry_run" not in v[3].lower()]
@@ -145,7 +148,7 @@ def test_no_todo_implement_in_production():
 def test_all_api_endpoints_implemented():
     """Verify all API endpoints are implemented (no stub returns)."""
     violations = []
-    api_dir = Path("backend/api/routes")
+    api_dir = PROJECT_ROOT / "backend" / "api" / "routes"
 
     if not api_dir.exists():
         pytest.skip("API routes directory not found")

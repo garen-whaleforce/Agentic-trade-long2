@@ -11,11 +11,11 @@ This ensures:
 """
 
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Union, Dict, Any
 from pydantic import BaseModel
 
 from core.config import settings
-from schemas.llm_output import BatchScoreOutput
+from schemas.llm_output import BatchScoreOutput, Evidence, KeyFlags
 from guardrails.evidence_rules import EvidenceValidator, validate_evidence
 
 
@@ -80,14 +80,14 @@ class DeterministicGate:
 
     def evaluate(
         self,
-        llm_output: Optional[BatchScoreOutput],
+        llm_output: Optional[Union[BatchScoreOutput, Dict[str, Any]]],
         data_complete: bool = True,
     ) -> GateResult:
         """
         Evaluate LLM output through the deterministic gate.
 
         Args:
-            llm_output: Output from batch_score LLM
+            llm_output: Output from batch_score LLM (BatchScoreOutput or dict)
             data_complete: Whether underlying data was complete
 
         Returns:
@@ -95,6 +95,13 @@ class DeterministicGate:
         """
         block_reasons = []
         passed_checks = []
+
+        # Convert dict to BatchScoreOutput if needed
+        if isinstance(llm_output, dict):
+            try:
+                llm_output = self._dict_to_batch_score_output(llm_output)
+            except Exception:
+                llm_output = None
 
         # Handle invalid/missing output
         if llm_output is None:
@@ -204,6 +211,51 @@ class DeterministicGate:
         confidence = 0.5 * base + 0.3 * check_factor + 0.2 * evidence_factor
 
         return round(min(max(confidence, 0.0), 1.0), 3)
+
+    def _dict_to_batch_score_output(self, data: Dict[str, Any]) -> BatchScoreOutput:
+        """
+        Convert a dict to BatchScoreOutput.
+
+        Args:
+            data: Dict with score, trade_candidate, evidence_count, etc.
+
+        Returns:
+            BatchScoreOutput instance
+        """
+        # Handle key_flags - can be dict or KeyFlags
+        key_flags_data = data.get("key_flags", {})
+        if isinstance(key_flags_data, KeyFlags):
+            key_flags = key_flags_data
+        else:
+            key_flags = KeyFlags(
+                guidance_positive=key_flags_data.get("guidance_positive", False),
+                revenue_beat=key_flags_data.get("revenue_beat", False),
+                margin_concern=key_flags_data.get("margin_concern", False),
+                guidance_raised=key_flags_data.get("guidance_raised", False),
+                buyback_announced=key_flags_data.get("buyback_announced", False),
+            )
+
+        # Handle evidence_snippets - can be list of dicts or Evidence objects
+        evidence_snippets_data = data.get("evidence_snippets", [])
+        evidence_snippets = []
+        for e in evidence_snippets_data:
+            if isinstance(e, Evidence):
+                evidence_snippets.append(e)
+            else:
+                evidence_snippets.append(Evidence(
+                    quote=e.get("quote", ""),
+                    speaker=e.get("speaker", ""),
+                    section=e.get("section", "prepared"),
+                ))
+
+        return BatchScoreOutput(
+            score=data.get("score", 0.0),
+            trade_candidate=data.get("trade_candidate", False),
+            evidence_count=data.get("evidence_count", 0),
+            key_flags=key_flags,
+            evidence_snippets=evidence_snippets,
+            no_trade_reason=data.get("no_trade_reason"),
+        )
 
 
 # Global gate instance

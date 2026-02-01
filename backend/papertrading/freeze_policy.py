@@ -224,6 +224,37 @@ class FreezePolicy:
 
         return True
 
+    def freeze(
+        self,
+        git_commit: str = "HEAD",
+        batch_score_model: str = "gpt-4o-mini",
+        full_audit_model: str = "claude-3.5-sonnet",
+        batch_score_prompt_version: str = "v1.0.0",
+        full_audit_prompt_version: str = "v1.0.0",
+        score_threshold: float = 0.70,
+        evidence_min_count: int = 2,
+        block_on_margin_concern: bool = True,
+    ) -> FreezeManifest:
+        """
+        Create and save a freeze manifest with default or custom settings.
+
+        This is a convenience method for enabling paper trading.
+        """
+        return self.create_manifest(
+            git_commit=git_commit,
+            batch_score_model=batch_score_model,
+            full_audit_model=full_audit_model,
+            batch_score_prompt_version=batch_score_prompt_version,
+            full_audit_prompt_version=full_audit_prompt_version,
+            score_threshold=score_threshold,
+            evidence_min_count=evidence_min_count,
+            block_on_margin_concern=block_on_margin_concern,
+        )
+
+    def is_frozen(self) -> bool:
+        """Check if we're in frozen period with a valid manifest."""
+        return self.has_manifest() and self.is_frozen_period()
+
 
 def get_freeze_policy() -> FreezePolicy:
     """Get freeze policy instance."""
@@ -361,18 +392,3 @@ def require_frozen() -> FrozenConfig:
         )
 
     return frozen
-
-
-# Add convenience methods to FreezePolicy
-FreezePolicy.freeze = lambda self: self.create_manifest(
-    git_commit="HEAD",
-    batch_score_model="gpt-4o-mini",
-    full_audit_model="claude-3.5-sonnet",
-    batch_score_prompt_version="v1.0.0",
-    full_audit_prompt_version="v1.0.0",
-    score_threshold=0.70,
-    evidence_min_count=2,
-    block_on_margin_concern=True,
-)
-
-FreezePolicy.is_frozen = lambda self: self.has_manifest() and self.is_frozen_period()

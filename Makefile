@@ -297,5 +297,5 @@ validate-runs:
 # All
 # =====================================
 
-all: check test gate-all leakage forbid-stub
+all: check test gate-all leakage forbid-stub forbid-todo
 	@echo "All checks and tests complete"

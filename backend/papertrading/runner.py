@@ -169,7 +169,7 @@ class PaperTradingRunner:
                 run_id=run_id,
                 timestamp=datetime.utcnow().isoformat(),
                 purpose="Paper trading daily run",
-                date_range={"date": str(run_date)},
+                date_range={"start": str(run_date), "end": str(run_date)},
                 models={"batch_score": self.frozen.model},
                 prompt_versions={"batch_score": self.frozen.prompt_version},
                 thresholds={
