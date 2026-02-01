@@ -473,81 +473,17 @@ transcript = resp.json()
 
 ---
 
-## 12) 專案進度記錄
+## 12) 專案進度摘要
 
-> 記錄關鍵發現、工程進展、實驗結果。每次有重要變化時更新此章節。
+> 詳細記錄請見 `docs/decisions/` ADR 文件。
 
-### 2026-02-01：6-PR 工程路線圖完成（113 測試通過）
+| 日期 | 里程碑 | ADR |
+|------|--------|-----|
+| 2026-02-01 | 6-PR 工程路線圖完成（113 測試） | [ADR-002](docs/decisions/ADR-002-6pr-engineering-roadmap.md) |
+| 2026-01-31 | Production Config Freeze | [ADR-001](docs/decisions/ADR-001-production-config-freeze.md) |
 
-#### 完成項目
+### 目前狀態
 
-| PR | 功能 | 測試數 | 關鍵檔案 |
-|---|---|---|---|
-| **PR1** | Leakage Auditor Allowlist | 7 | `backend/guardrails/leakage_auditor.py` |
-| **PR2** | Prompt SSOT + prompt_hash 凍結 | 11 | `backend/papertrading/freeze_policy.py` |
-| **PR3** | JSON 輸出健壯化 | 30 | `backend/llm/json_parser.py` |
-| **PR4** | Artifacts Schema | 17 | `backend/schemas/artifacts.py` |
-| **PR5** | Fail-Closed 機制 | 25 | `backend/papertrading/fail_closed.py` |
-| **PR6** | CLI 入口 + RUNBOOK 對齊 | 16 | `backend/papertrading/cli.py` |
-
-#### 新增模組說明
-
-1. **Leakage Auditor Allowlist (PR1)**
-   - `ALLOWLIST_PATTERNS`: 允許 result schema 變數（如 `return_pct`, `win_rate`）出現在特定檔案
-   - `include_patterns`: 縮小掃描範圍，避免誤報
-
-2. **Prompt SSOT (PR2)**
-   - `compute_prompt_hash()`: SHA256(system_prompt + user_template)
-   - `FreezeManifest.prompt_hash`: 凍結 prompt 版本
-   - `validate_runtime()`: 執行時驗證 prompt 一致性
-
-3. **JSON Parser (PR3)**
-   - `extract_json_from_markdown()`: 處理 ```json 包裹
-   - `fix_trailing_commas()`: 修復 LLM 常見錯誤
-   - `attempt_truncation_recovery()`: 嘗試修復截斷的 JSON
-   - `NO_TRADE_DEFAULT`: 解析失敗時的保守預設值
-
-4. **Artifacts Schema (PR4)**
-   - `RunManifest`: 執行配置（model, prompt, threshold）
-   - `SignalArtifact`: 個別信號（score, evidence, flags）
-   - `PositionArtifact`: 部位（entry/exit date, weight）
-   - `PerformanceArtifact`: 績效（SSOT from Whaleforce API）
-
-5. **Fail-Closed (PR5)**
-   - `PreRunValidator`: 執行前檢查（freeze_policy, prompt_hash, disk_space）
-   - `@fail_closed`: 裝飾器，錯誤時返回 NO_TRADE
-   - `HealthChecker`: 服務可用性檢查
-
-6. **CLI Entry Point (PR6)**
-   - `check-orders`: 檢查待處理訂單
-   - `daily-report`: 每日報告
-   - `weekly-report`: 每週報告
-   - `emergency-stop`: 緊急停止
-   - `status`: 系統狀態
-   - `validate`: 配置驗證
-
-#### CLI 使用方式
-
-```bash
-python -m backend.papertrading.cli check-orders
-python -m backend.papertrading.cli daily-report --date TODAY
-python -m backend.papertrading.cli weekly-report
-python -m backend.papertrading.cli emergency-stop
-python -m backend.papertrading.cli status
-python -m backend.papertrading.cli validate
-```
-
-#### 測試執行
-
-```bash
-# 執行所有 PR1-6 測試
-python3 -m pytest tests/guardrails/ tests/llm/ tests/papertrading/ tests/schemas/ -v
-```
-
-<!--
-格式範例：
-### YYYY-MM-DD：標題
-- 發現/變化描述
-- 實驗結果（如有）
-- 下一步行動
--->
+- **Paper Trading 基礎設施**：✅ 完成（PR1-6）
+- **測試覆蓋**：113 個測試通過
+- **CLI 可用**：`python -m backend.papertrading.cli --help`
