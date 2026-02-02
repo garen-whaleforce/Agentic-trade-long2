@@ -214,6 +214,17 @@ class TestMarketDataClientUnit:
         assert client1 is not client2
 
 
+def _can_connect_to_db() -> bool:
+    """Check if we can connect to the database."""
+    try:
+        client = MarketDataClient()
+        return client.check_connection()
+    except Exception:
+        return False
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not _can_connect_to_db(), reason="Database not available")
 class TestMarketDataClientIntegration:
     """Integration tests that require actual database connection."""
 
@@ -222,15 +233,11 @@ class TestMarketDataClientIntegration:
         """Create a client for integration tests."""
         return MarketDataClient()
 
-    @pytest.mark.integration
     def test_real_connection(self, client):
         """Test real database connection."""
-        # This test requires actual database access
-        # Skip if not in integration test mode
         result = client.check_connection()
         assert result is True, "Database connection failed"
 
-    @pytest.mark.integration
     def test_real_price_retrieval(self, client):
         """Test real price retrieval for a known stock."""
         # Use a date we know has data
@@ -238,7 +245,6 @@ class TestMarketDataClientIntegration:
         assert price is not None, "Should have price data for AAPL"
         assert price > 0, "Price should be positive"
 
-    @pytest.mark.integration
     def test_real_ohlcv_retrieval(self, client):
         """Test real OHLCV retrieval."""
         result = client.get_ohlcv("AAPL", date(2024, 1, 10), date(2024, 1, 15))
