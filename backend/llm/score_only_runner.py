@@ -18,6 +18,7 @@ from schemas.llm_output import BatchScoreOutput, Evidence, KeyFlags
 from .routing import LLMRouter, LLMConfig, get_llm_router
 from .prompt_registry import PromptRegistry, PromptTemplate, get_prompt_registry
 from .json_parser import parse_llm_json, NO_TRADE_DEFAULT  # PR3: Robust JSON parsing
+from .cache import LLMCache, get_llm_cache  # PR8: LLM response caching
 
 
 class LLMRequest(BaseModel):
@@ -102,6 +103,7 @@ JSON Schema:
         model: Optional[str] = None,
         router: Optional[LLMRouter] = None,
         prompt_version: str = "batch_score_v1",
+        cache: Optional[LLMCache] = None,
     ):
         """
         Initialize the runner.
@@ -110,12 +112,14 @@ JSON Schema:
             model: Override model (optional, uses router default if not set)
             router: LLM router instance
             prompt_version: Prompt template ID to load (e.g., "batch_score_v1")
+            cache: LLM response cache (optional, uses global cache if not set)
         """
         self.router = router or get_llm_router()
         self.prompt_version = prompt_version
         self._model_override = model
         self._prompt_registry = get_prompt_registry()
         self._loaded_prompt: Optional[PromptTemplate] = None
+        self._cache = cache or get_llm_cache()
 
     def _get_prompt_template(self) -> PromptTemplate:
         """Load the prompt template from registry (with caching)."""
@@ -223,7 +227,7 @@ JSON Schema:
         Args:
             event_id: Event identifier
             pack: Transcript pack
-            use_cache: Whether to use cached results
+            use_cache: Whether to use cached results (PR8: LLM caching)
 
         Returns:
             Tuple of (LLMRequest, LLMResponse)
@@ -246,6 +250,10 @@ JSON Schema:
         user_prompt = self._render_prompt(pack)
         rendered_prompt_hash = self._calculate_prompt_hash(user_prompt)
 
+        # Compute transcript hash for caching
+        transcript_text = pack.to_llm_context()
+        transcript_hash = LLMCache.compute_transcript_hash(transcript_text)
+
         # Create request record with proper template tracking
         request = LLMRequest(
             event_id=event_id,
@@ -260,6 +268,35 @@ JSON Schema:
                 "response_format": config.response_format,
             },
         )
+
+        # PR8: Check cache first
+        if use_cache and self._cache.enabled:
+            cached = self._cache.get(
+                model=config.model,
+                prompt_hash=self.prompt_hash,
+                transcript_hash=transcript_hash,
+            )
+            if cached:
+                # Build response from cache
+                try:
+                    parsed_output = self._parse_response(json.dumps(cached.raw_output))
+                    parse_error = None
+                except ValueError as e:
+                    parsed_output = None
+                    parse_error = str(e)
+
+                response = LLMResponse(
+                    event_id=event_id,
+                    timestamp=datetime.utcnow().isoformat(),
+                    model=config.model,
+                    raw_output=cached.raw_output,
+                    parsed_output=parsed_output,
+                    parse_error=parse_error,
+                    token_usage=cached.token_usage,
+                    cost_usd=0.0,  # No cost for cached responses
+                    latency_ms=0,  # No latency for cached responses
+                )
+                return request, response
 
         # Call LLM via litellm
         start_time = time.time()
@@ -371,6 +408,20 @@ JSON Schema:
             cost_usd=cost,
             latency_ms=latency_ms,
         )
+
+        # PR8: Store in cache for future runs
+        if use_cache and self._cache.enabled:
+            self._cache.set(
+                model=config.model,
+                prompt_hash=self.prompt_hash,
+                transcript_hash=transcript_hash,
+                rendered_prompt=user_prompt,
+                parameters=request.parameters,
+                raw_output=raw_output,
+                token_usage=response.token_usage,
+                cost_usd=cost,
+                latency_ms=latency_ms,
+            )
 
         return request, response
 
