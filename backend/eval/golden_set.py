@@ -33,7 +33,7 @@ class ExpectedKeyFlags(BaseModel):
 class ExpectedOutput(BaseModel):
     """Expected LLM output for a transcript."""
 
-    trade_candidate: bool
+    trade_candidate: Optional[bool] = None  # None = edge case, either result acceptable
     score_min: float = Field(ge=0, le=1, description="Minimum acceptable score")
     score_max: float = Field(ge=0, le=1, description="Maximum acceptable score")
     key_flags: ExpectedKeyFlags = Field(default_factory=ExpectedKeyFlags)
@@ -232,16 +232,18 @@ class GoldenSet:
             expected_trade = expected.expected.trade_candidate
             actual_trade = actual.get("trade_candidate", False)
 
-            if expected_trade and actual_trade:
-                tp += 1
-            elif not expected_trade and actual_trade:
-                fp += 1
-            elif not expected_trade and not actual_trade:
-                tn += 1
-            else:
-                fn += 1
+            # Skip edge cases (expected=None) for confusion matrix
+            if expected_trade is not None:
+                if expected_trade and actual_trade:
+                    tp += 1
+                elif not expected_trade and actual_trade:
+                    fp += 1
+                elif not expected_trade and not actual_trade:
+                    tn += 1
+                else:
+                    fn += 1
 
-            # Score accuracy
+            # Score accuracy (include edge cases)
             actual_score = actual.get("score", 0)
             score_errors.append(
                 abs(actual_score - (expected.expected.score_min + expected.expected.score_max) / 2)

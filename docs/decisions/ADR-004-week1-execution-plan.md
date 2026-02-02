@@ -185,6 +185,30 @@ aegis eval --model gpt-4o-mini --prompt v1.0.0 --golden-set golden_v0.json
 - 灰色地帶（容易誤判）
 ```
 
+## Week 1 執行進度
+
+### 2026-02-02 更新
+
+| 任務 | 狀態 | 說明 |
+|------|------|------|
+| **A1. market_data_client** | ✅ 完成 | PostgreSQL 客戶端，fail-closed 設計，11 單元測試 |
+| **A2. entry fill** | ✅ 完成 | PENDING → OPEN 轉換邏輯，整合到 runner.py |
+| **B1. LLM 快取** | ✅ 完成 | Cache key = (model, prompt_hash, transcript_hash)，10 單元測試 |
+| **B2. Golden Set** | ✅ Framework | Schema + 評估 metrics，11 單元測試。待填入 50 份資料 |
+
+**測試結果**: 150 passed, 3 skipped (integration tests)
+
+**提交紀錄**:
+- `31e6ae5`: PR8: LLM response cache for fast iteration
+- `34e6710`: PR8: Golden Set framework for LLM evaluation
+
+### Go/No-Go 關卡狀態
+
+- [x] eval harness 可穩定重跑，結果可複現（快取機制完成）
+- [x] market_data_client 穩定可用
+- [ ] Golden Set v0 填入 50 份標註資料
+- [ ] 端到端 paper trading 驗證
+
 ## 參考資料
 
 - ChatGPT Pro Task ID: 9320
