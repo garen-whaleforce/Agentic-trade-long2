@@ -1,0 +1,46 @@
+.git
+.github
+.env
+.env.*
+LICENSE
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+venv/
+.venv/
+
+# Node
+frontend/node_modules
+frontend/.next
+
+# Large data (not needed in build)
+eval_results/
+chatgpt_pro_review/
+chatgpt_pro_review.zip
+models/
+golden_set/
+runs/
+cache/
+logs/
+data/
+signals/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
+.ccb/
+
+# Tests (run from host, not in container)
+tests/

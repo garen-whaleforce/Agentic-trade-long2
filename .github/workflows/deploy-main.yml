@@ -1,0 +1,148 @@
+name: CI/CD Main Branch (Staging → Production)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  STAGE_URL: http://localhost:18410
+  STAGE_FRONTEND_URL: http://localhost:13410
+  PROD_URL: http://localhost:8400
+  PROD_FRONTEND_URL: http://localhost:3400
+  ACTIONS_REPO: WhaleforceAI/github-actions-templates
+
+jobs:
+  staging-tests:
+    runs-on: self-hosted
+    outputs:
+      tests_passed: ${{ steps.tests.outputs.result }}
+
+    steps:
+      - name: Pre-cleanup
+        run: docker compose -f docker-compose.stage.yml down -v --rmi local 2>/dev/null || true
+
+      - uses: actions/checkout@v4
+
+      - name: Checkout actions templates
+        run: |
+          rm -rf .github/actions-templates
+          gh repo clone ${{ env.ACTIONS_REPO }} .github/actions-templates -- --depth 1
+
+      - name: Create .env file from secrets
+        run: |
+          cat <<EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
+
+      - name: Create data directories
+        run: mkdir -p signals configs logs
+
+      - name: Build and start staging container
+        run: |
+          docker compose -f docker-compose.stage.yml build --no-cache
+          docker compose -f docker-compose.stage.yml up -d
+
+      - name: Health check (backend)
+        run: |
+          sleep 15
+          for i in {1..10}; do
+            if curl -sf ${{ env.STAGE_URL }}/health; then
+              echo "Backend healthy!"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          echo "Waiting for Next.js frontend to start..."
+          FRONTEND_OK=false
+          for i in {1..20}; do
+            if curl -sf ${{ env.STAGE_FRONTEND_URL }}/paper-trading -o /dev/null; then
+              echo "Frontend healthy!"
+              FRONTEND_OK=true
+              break
+            fi
+            echo "Waiting for frontend... ($i/20)"
+            sleep 5
+          done
+          if [ "$FRONTEND_OK" = "false" ]; then
+            echo "::error::Frontend not reachable on ${{ env.STAGE_FRONTEND_URL }}"
+            echo "--- Container logs (last 80 lines) ---"
+            docker compose -f docker-compose.stage.yml logs --tail=80
+            echo "--- Listening ports ---"
+            ss -tlnp | grep -E '(13410|18410|3400|8400)' || echo "No matching ports found"
+            echo "--- Supervisord process check ---"
+            docker compose -f docker-compose.stage.yml exec -T contrarian-alpha-stage supervisorctl status 2>/dev/null || echo "supervisorctl not reachable"
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify tests folder exists
+        run: |
+          if [ ! -d "tests" ]; then
+            echo "ERROR: tests/ folder not found"
+            exit 1
+          fi
+          ls -la tests/
+
+      - name: Run full tests
+        id: tests
+        run: |
+          pip install pytest requests
+          pytest tests/api_test.py -v \
+            --service-url=${{ env.STAGE_URL }} \
+            --frontend-url=${{ env.STAGE_FRONTEND_URL }}
+          echo "result=PASSED" >> $GITHUB_OUTPUT
+
+      - name: Cleanup staging
+        if: always()
+        run: docker compose -f docker-compose.stage.yml down -v --rmi local || true
+
+  production-deploy:
+    runs-on: self-hosted
+    needs: staging-tests
+    if: github.event_name == 'push' && needs.staging-tests.outputs.tests_passed == 'PASSED'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .env file from secrets
+        run: |
+          cat <<EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
+
+      - name: Create data directories
+        run: mkdir -p signals configs logs
+
+      - name: Deploy to production
+        run: |
+          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml up -d
+
+      - name: Health check (backend)
+        run: |
+          sleep 15
+          for i in {1..10}; do
+            if curl -sf ${{ env.PROD_URL }}/health; then
+              echo "Production backend healthy!"
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          for i in {1..12}; do
+            if curl -sf ${{ env.PROD_FRONTEND_URL }}/paper-trading -o /dev/null; then
+              echo "Production frontend healthy!"
+              break
+            fi
+            echo "Waiting for frontend... ($i/12)"
+            sleep 5
+          done
