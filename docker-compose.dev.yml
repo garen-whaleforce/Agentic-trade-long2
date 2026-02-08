@@ -1,6 +1,9 @@
 services:
   contrarian-alpha-dev:
-    build: .
+    build:
+      context: .
+      args:
+        BACKEND_PORT: "18400"
     container_name: contrarian-alpha-dev
     network_mode: host
     environment:

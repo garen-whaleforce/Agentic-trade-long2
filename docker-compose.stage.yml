@@ -1,6 +1,9 @@
 services:
   contrarian-alpha-stage:
-    build: .
+    build:
+      context: .
+      args:
+        BACKEND_PORT: "18410"
     container_name: contrarian-alpha-stage
     network_mode: host
     environment:
