@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Pre-cleanup
-        run: docker compose -f docker-compose.dev.yml down -v --rmi local 2>/dev/null || true
+        run: docker run --rm -v "${{ github.workspace }}:/workspace" alpine rm -rf /workspace/data-dev 2>/dev/null || true
 
       - uses: actions/checkout@v4
 
@@ -40,15 +40,28 @@ jobs:
           docker compose -f docker-compose.dev.yml build --no-cache
           docker compose -f docker-compose.dev.yml up -d
 
-      - name: Health check
+      - name: Health check (backend)
         id: health-check
         run: |
           sleep 15
           for i in {1..10}; do
             if curl -sf ${{ env.SERVICE_URL }}/health; then
+              echo "Backend healthy!"
               echo "running=true" >> $GITHUB_OUTPUT
               break
             fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          echo "Waiting for Next.js frontend to start..."
+          for i in {1..20}; do
+            if curl -sf ${{ env.FRONTEND_URL }}/paper-trading -o /dev/null; then
+              echo "Frontend healthy!"
+              break
+            fi
+            echo "Waiting for frontend... ($i/20)"
             sleep 5
           done
 
@@ -68,7 +81,8 @@ jobs:
         run: |
           pip install pytest requests
           pytest tests/api_test.py::TestHealthEndpoints -v \
-            --service-url=${{ env.SERVICE_URL }}
+            --service-url=${{ env.SERVICE_URL }} \
+            --frontend-url=${{ env.FRONTEND_URL }}
 
       - name: Claude auto-fix
         if: failure()

@@ -1,0 +1,39 @@
+# UI Test Configuration for Contrarian Alpha Paper Trading Dashboard
+# These tests are executed via Claude Playwright automation
+#
+# URL Substitution:
+#   - Use {{SERVICE_URL}} as placeholder in prompts
+#   - Override via SERVICE_URL environment variable in CI
+
+default_service_url: "http://localhost:3400"
+
+test_cases:
+  - name: smoke-test
+    description: Basic page load and health check
+    timeout_minutes: 10
+    autofix_scope: playwright-smoke
+    enabled: true
+    level: smoke  # Run on dev and main
+    prompt: |
+      Open {{SERVICE_URL}}/paper-trading,
+      verify the page loads successfully,
+      check that the KPI cards (Open Positions, Closed Positions, etc.) are displayed,
+      check that no error messages are displayed.
+
+  # Uncomment and customize when ready to add more tests
+  # - name: positions-table
+  #   description: Test positions table sorting and display
+  #   timeout_minutes: 15
+  #   autofix_scope: playwright-positions
+  #   enabled: false
+  #   level: full  # Run on main only
+  #   prompt: |
+  #     Open {{SERVICE_URL}}/paper-trading,
+  #     click on the "Positions" tab,
+  #     verify the positions table loads with columns (Symbol, Entry Date, Price, etc.),
+  #     click a column header to test sorting.
+
+# Test levels:
+#   - smoke: Critical tests, run on all branches
+#   - quick: Fast tests, run on dev for relevant changes
+#   - full: Complete tests, run on main branch only
