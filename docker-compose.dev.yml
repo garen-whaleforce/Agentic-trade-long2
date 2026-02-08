@@ -1,0 +1,15 @@
+services:
+  contrarian-alpha-dev:
+    build: .
+    container_name: contrarian-alpha-dev
+    network_mode: host
+    environment:
+      BACKEND_PORT: "18400"
+      FRONTEND_PORT: "13400"
+    env_file:
+      - .env
+    volumes:
+      - ./signals:/app/signals:ro
+      - ./configs:/app/configs:ro
+      - ./logs:/app/logs:ro
+    restart: unless-stopped

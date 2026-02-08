@@ -13,6 +13,29 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--service-url",
+        default="http://localhost:8400",
+        help="Backend API base URL for CI/CD smoke tests",
+    )
+    parser.addoption(
+        "--frontend-url",
+        default="http://localhost:3400",
+        help="Frontend base URL for CI/CD smoke tests",
+    )
+
+
+@pytest.fixture
+def service_url(request):
+    return request.config.getoption("--service-url").rstrip("/")
+
+
+@pytest.fixture
+def frontend_url(request):
+    return request.config.getoption("--frontend-url").rstrip("/")
+
+
 @pytest.fixture
 def sample_event_date() -> date:
     """Sample event date for testing."""
