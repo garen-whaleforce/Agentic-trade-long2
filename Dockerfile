@@ -1,5 +1,5 @@
 # ============================================================
-# Goshawk Alpha — Paper Trading Dashboard
+# Contrarian Alpha — Paper Trading Dashboard
 # Multi-stage: Node build → Python+Node runtime + supervisord
 # ============================================================
 

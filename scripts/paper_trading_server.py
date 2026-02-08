@@ -23,7 +23,7 @@ POSITIONS_FILE = SIGNALS_DIR / "open_positions.json"
 CONFIG_FILE = PROJECT_ROOT / "configs" / "v9_g2_frozen.yaml"
 LOG_FILE = PROJECT_ROOT / "logs" / "daily_signal.log"
 
-app = FastAPI(title="Goshawk Alpha — Paper Trading API")
+app = FastAPI(title="Contrarian Alpha — Paper Trading API")
 
 
 @app.get("/health")
