@@ -10,6 +10,8 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
+ARG BACKEND_PORT=8400
+ENV BACKEND_PORT=${BACKEND_PORT}
 RUN npm run build && npm prune --production
 
 # Stage 2: Runtime

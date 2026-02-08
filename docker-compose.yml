@@ -1,6 +1,9 @@
 services:
   contrarian-alpha:
-    build: .
+    build:
+      context: .
+      args:
+        BACKEND_PORT: "8400"
     container_name: contrarian-alpha
     network_mode: host
     environment:
