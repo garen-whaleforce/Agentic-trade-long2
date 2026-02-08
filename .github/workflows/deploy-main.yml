@@ -44,13 +44,25 @@ jobs:
           docker compose -f docker-compose.stage.yml build --no-cache
           docker compose -f docker-compose.stage.yml up -d
 
-      - name: Health check
+      - name: Health check (backend)
         run: |
           sleep 15
           for i in {1..10}; do
             if curl -sf ${{ env.STAGE_URL }}/health; then
+              echo "Backend healthy!"
               break
             fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          for i in {1..12}; do
+            if curl -sf ${{ env.STAGE_FRONTEND_URL }}/paper-trading -o /dev/null; then
+              echo "Frontend healthy!"
+              break
+            fi
+            echo "Waiting for frontend... ($i/12)"
             sleep 5
           done
 
@@ -101,13 +113,24 @@ jobs:
           docker compose -f docker-compose.yml build
           docker compose -f docker-compose.yml up -d
 
-      - name: Health check
+      - name: Health check (backend)
         run: |
           sleep 15
           for i in {1..10}; do
             if curl -sf ${{ env.PROD_URL }}/health; then
-              echo "Production healthy!"
+              echo "Production backend healthy!"
               break
             fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          for i in {1..12}; do
+            if curl -sf ${{ env.PROD_FRONTEND_URL }}/paper-trading -o /dev/null; then
+              echo "Production frontend healthy!"
+              break
+            fi
+            echo "Waiting for frontend... ($i/12)"
             sleep 5
           done
