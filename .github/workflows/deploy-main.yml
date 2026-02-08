@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Pre-cleanup
-        run: docker compose -f docker-compose.stage.yml down -v --rmi local 2>/dev/null || true
+        run: docker run --rm -v "${{ github.workspace }}:/workspace" alpine rm -rf /workspace/data-stage 2>/dev/null || true
 
       - uses: actions/checkout@v4
 
@@ -76,6 +76,7 @@ jobs:
             ss -tlnp | grep -E '(13410|18410|3400|8400)' || echo "No matching ports found"
             echo "--- Supervisord process check ---"
             docker compose -f docker-compose.stage.yml exec -T contrarian-alpha-stage supervisorctl status 2>/dev/null || echo "supervisorctl not reachable"
+            exit 1
           fi
 
       - uses: actions/setup-python@v5
@@ -103,9 +104,12 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.stage.yml down -v --rmi local || true
 
+      # NOTE: No auto-fix on main branch - failures require manual intervention
+
   production-deploy:
     runs-on: self-hosted
     needs: staging-tests
+    # Only deploy on push to main (not on PR), and only if tests passed
     if: github.event_name == 'push' && needs.staging-tests.outputs.tests_passed == 'PASSED'
 
     steps:
