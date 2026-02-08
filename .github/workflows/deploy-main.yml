@@ -57,14 +57,26 @@ jobs:
 
       - name: Health check (frontend)
         run: |
-          for i in {1..12}; do
+          echo "Waiting for Next.js frontend to start..."
+          FRONTEND_OK=false
+          for i in {1..20}; do
             if curl -sf ${{ env.STAGE_FRONTEND_URL }}/paper-trading -o /dev/null; then
               echo "Frontend healthy!"
+              FRONTEND_OK=true
               break
             fi
-            echo "Waiting for frontend... ($i/12)"
+            echo "Waiting for frontend... ($i/20)"
             sleep 5
           done
+          if [ "$FRONTEND_OK" = "false" ]; then
+            echo "::error::Frontend not reachable on ${{ env.STAGE_FRONTEND_URL }}"
+            echo "--- Container logs (last 80 lines) ---"
+            docker compose -f docker-compose.stage.yml logs --tail=80
+            echo "--- Listening ports ---"
+            ss -tlnp | grep -E '(13410|18410|3400|8400)' || echo "No matching ports found"
+            echo "--- Supervisord process check ---"
+            docker compose -f docker-compose.stage.yml exec -T contrarian-alpha-stage supervisorctl status 2>/dev/null || echo "supervisorctl not reachable"
+          fi
 
       - uses: actions/setup-python@v5
         with:
