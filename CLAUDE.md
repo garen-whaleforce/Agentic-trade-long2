@@ -1055,7 +1055,6 @@ Symlink 讓這個路徑指向 Docker 容器掛載的 signals 目錄，使得：
 gpu5090 使用 sklearn 1.8.0（與模型訓練版本一致），本地 sklearn 1.6.1 有 version warning 但輸出相同。
 
 ---
-
 ### FMP API 整合 — 2026 即時資料來源（2026-02-09）
 
 **背景**：DB 為 batch-load（最新價格 2025-12-09），2026 年 paper trading 需要即時資料。
