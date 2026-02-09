@@ -60,7 +60,7 @@ jobs:
           echo "Waiting for Next.js frontend to start..."
           FRONTEND_OK=false
           for i in {1..20}; do
-            if curl -sf ${{ env.STAGE_FRONTEND_URL }}/paper-trading -o /dev/null; then
+            if curl -sf ${{ env.STAGE_FRONTEND_URL }}/dashboard -o /dev/null; then
               echo "Frontend healthy!"
               FRONTEND_OK=true
               break
@@ -143,7 +143,7 @@ jobs:
       - name: Health check (frontend)
         run: |
           for i in {1..12}; do
-            if curl -sf ${{ env.PROD_FRONTEND_URL }}/paper-trading -o /dev/null; then
+            if curl -sf ${{ env.PROD_FRONTEND_URL }}/dashboard -o /dev/null; then
               echo "Production frontend healthy!"
               break
             fi

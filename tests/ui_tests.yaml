@@ -15,7 +15,7 @@ test_cases:
     enabled: true
     level: smoke  # Run on dev and main
     prompt: |
-      Open {{SERVICE_URL}}/paper-trading,
+      Open {{SERVICE_URL}}/dashboard,
       verify the page loads successfully,
       check that the KPI cards (Open Positions, Closed Positions, etc.) are displayed,
       check that no error messages are displayed.
@@ -28,7 +28,7 @@ test_cases:
   #   enabled: false
   #   level: full  # Run on main only
   #   prompt: |
-  #     Open {{SERVICE_URL}}/paper-trading,
+  #     Open {{SERVICE_URL}}/dashboard,
   #     click on the "Positions" tab,
   #     verify the positions table loads with columns (Symbol, Entry Date, Price, etc.),
   #     click a column header to test sorting.

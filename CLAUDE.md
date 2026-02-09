@@ -139,7 +139,7 @@ docker compose build                          # 建置 production image
 docker compose up -d                          # 啟動 production (8400/3400)
 docker compose -f docker-compose.dev.yml up -d  # 啟動 dev (18400/13400)
 curl http://localhost:8400/health              # 驗證 backend
-curl http://localhost:3400/paper-trading       # 驗證 frontend
+curl http://localhost:3400/dashboard            # 驗證 frontend
 
 # CI 測試（本地執行）
 pip install pytest requests
@@ -616,7 +616,7 @@ volumes:
 | `test_paper_trading_config` | `GET /api/paper-trading/config` | 200 + JSON |
 | `test_paper_trading_positions` | `GET /api/paper-trading/positions` | 200 + JSON |
 | `test_paper_trading_signal_dates` | `GET /api/paper-trading/signal-dates` | 200 + JSON |
-| `test_paper_trading_page` | `GET /paper-trading` (frontend) | 200 + HTML |
+| `test_dashboard_page` | `GET /dashboard` (frontend) | 200 + HTML |
 
 ### 踩坑記錄
 
@@ -631,7 +631,7 @@ volumes:
 # 本地測試
 docker compose build && docker compose up -d
 curl http://localhost:8400/health
-curl http://localhost:3400/paper-trading
+curl http://localhost:3400/dashboard
 
 # 觸發 CI（push to dev or main）
 git push origin dev     # → 觸發 deploy-dev.yml
@@ -686,8 +686,9 @@ git log --oneline docs/decisions/
 
 | 日期 | 里程碑 | ADR |
 |------|--------|-----|
+| 2026-02-10 | **gpu5090 每日信號自動化 + LINE 通知** — cron 每日 6:30 AM +8 (5:30 PM ET) 自動生成信號；LINE push 通知買進/賣出；gpu5090 vs 本地輸出一致性驗證通過（5 events prob 完全相同）；前端標題 Rocket Screener → Contrarian Alpha | run_daily_signal.sh, cron on gpu5090 |
 | 2026-02-10 | **CI/CD Pipeline 完成** — Docker 單容器（supervisord）+ GitHub Actions（dev smoke test + main staging→production）；`WhaleforceAI/contrarian-alpha` repo 建立；6/6 CI tests 通過；Production deploy 成功（backend:8400 + frontend:3400） | Dockerfile, supervisord.conf, .github/workflows/, tests/api_test.py |
-| 2026-02-10 | **Paper Trading Dashboard 前端完成** — FastAPI 後端 6 個 API + Next.js Dashboard（KPI 卡片、可排序持倉表、信號歷史、凍結配置顯示）；5 輪正反方辯論設計；8 個 API 測試全通過；`npm run build` 成功 | frontend/src/app/paper-trading/, backend/api/routes/paper_trading.py |
+| 2026-02-10 | **Paper Trading Dashboard 前端完成** — FastAPI 後端 6 個 API + Next.js Dashboard（KPI 卡片、可排序持倉表、信號歷史、凍結配置顯示）；5 輪正反方辯論設計；8 個 API 測試全通過；`npm run build` 成功 | frontend/src/app/dashboard/, backend/api/routes/paper_trading.py |
 | 2026-02-09 | **CAGR 極大化研究** — 5輪正反方辯論，3個候選配置 (D1: lev=3.0, D3: thr=0.56, D4: both) 提交 API 驗證中；目標 Sharpe>=1.8 下 CAGR 極大化 | scripts/submit_cagr_max_backtests.py |
 | 2026-02-09 | **週報 + ADR-007 完成** — 週報涵蓋 TP10 突破、Paper Trading 狀態、完整研究歷程；ADR-007 記錄 TP10 決策與 G2 vs tech_penalty 比較 | docs/weekly_report_20260209.md, docs/decisions/ADR-007-tp10-dynamic-exit.md |
 | 2026-02-09 | **持倉追蹤系統上線** — `daily_signal_v9.py` 新增 `--init-positions`/`--check-exits`；修復 max_hold_date bug (FMP 交易日曆不足時用日曆近似)；INTC 首個 TP 出場 +12.2% | scripts/daily_signal_v9.py, signals/open_positions.json |
@@ -986,6 +987,74 @@ git log --oneline docs/decisions/
 
 ---
 
+### gpu5090 每日信號自動化 + LINE 通知（2026-02-10）
+
+#### 架構
+
+```
+gpu5090 cron (6:30 AM +8 = 5:30 PM ET, Tue-Sat)
+  → run_daily_signal.sh
+    → daily_signal_v9.py --source fmp --date TODAY  (生成信號)
+    → daily_signal_v9.py --source fmp --check-exits (檢查出場)
+    → LINE push notification (買進/賣出/持倉摘要)
+    → signals/ 目錄 (Docker volume mount → Dashboard 自動更新)
+```
+
+#### gpu5090 目錄結構
+
+```
+/home/service/contrarian-alpha/
+├── backend/data/sector_momentum.py
+├── configs/v9_g2_frozen.yaml
+├── logs/                           # 每日執行日誌（保留 30 天）
+├── models/v9_model_20260207_160910.pkl
+├── run_daily_signal.sh             # 主執行腳本（含 LINE 通知）
+├── scripts/
+│   ├── daily_signal_v9.py
+│   └── fmp_data_client.py
+├── signals -> /home/service/actions-runner-service/_whaleforce/contrarian-alpha/contrarian-alpha/signals
+│                                   # symlink 到 Docker volume mount
+└── venv/                           # Python 3.12, sklearn 1.8.0
+```
+
+#### Cron 設定
+
+```bash
+# gpu5090 crontab (service user)
+30 6 * * 2-6 /home/service/contrarian-alpha/run_daily_signal.sh
+```
+
+- **6:30 AM +8 = 5:30 PM ET**（美股收盤後 1.5 小時，確保 FMP 資料完整）
+- **Tue-Sat** = Mon-Fri 美國交易日
+- 策略在 T+1 close 買入，所以有整個 T+1 來下單
+
+#### LINE 通知
+
+- **觸發**：每日 cron 執行後自動發送
+- **內容**：事件數、交易數、BUY 信號（symbol + prob）、出場事件、持倉數、Dashboard 連結
+- **API**: LINE Messaging API push message
+- **User ID**: `U7b355ddc2f4d2adadcbea6bc9df168b2`
+
+#### 關鍵 Symlink 原理
+
+`daily_signal_v9.py` 使用 `Path(__file__).parent.parent / "signals"` 計算路徑。
+Symlink 讓這個路徑指向 Docker 容器掛載的 signals 目錄，使得：
+1. 信號檔案直接寫入 Dashboard 可讀的位置
+2. 不需要額外的 scp/rsync 步驟
+
+#### 一致性驗證（2026-02-04 測試）
+
+| Symbol | gpu5090 prob | Local prob | 一致 |
+|--------|-------------|-----------|------|
+| CCI | 0.3909 | 0.3909 | ✅ |
+| LLY | 0.5345 | 0.5345 | ✅ |
+| QCOM | 0.6117 | 0.6117 | ✅ |
+| STE | 0.4911 | 0.4911 | ✅ |
+| TROW | 0.4678 | 0.4678 | ✅ |
+
+gpu5090 使用 sklearn 1.8.0（與模型訓練版本一致），本地 sklearn 1.6.1 有 version warning 但輸出相同。
+
+---
 ### FMP API 整合 — 2026 即時資料來源（2026-02-09）
 
 **背景**：DB 為 batch-load（最新價格 2025-12-09），2026 年 paper trading 需要即時資料。

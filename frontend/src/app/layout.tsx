@@ -40,10 +40,10 @@ export default function RootLayout({
                   Analysis
                 </a>
                 <a
-                  href="/paper-trading"
+                  href="/dashboard"
                   className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
                 >
-                  Paper Trading
+                  Dashboard
                 </a>
               </nav>
             </div>
