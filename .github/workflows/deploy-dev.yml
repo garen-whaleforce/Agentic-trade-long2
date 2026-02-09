@@ -57,7 +57,7 @@ jobs:
         run: |
           echo "Waiting for Next.js frontend to start..."
           for i in {1..20}; do
-            if curl -sf ${{ env.FRONTEND_URL }}/paper-trading -o /dev/null; then
+            if curl -sf ${{ env.FRONTEND_URL }}/dashboard -o /dev/null; then
               echo "Frontend healthy!"
               break
             fi

@@ -1,4 +1,4 @@
-"""Smoke tests for Goshawk Alpha Paper Trading Dashboard."""
+"""Smoke tests for Contrarian Alpha Paper Trading Dashboard."""
 
 import requests
 import pytest
@@ -48,7 +48,7 @@ class TestHealthEndpoints:
 class TestFrontendEndpoints:
     """Frontend smoke tests — verify Next.js is serving pages."""
 
-    def test_paper_trading_page(self, frontend_url):
-        r = requests.get(f"{frontend_url}/paper-trading", timeout=15)
+    def test_dashboard_page(self, frontend_url):
+        r = requests.get(f"{frontend_url}/dashboard", timeout=15)
         assert r.status_code == 200
         assert "html" in r.headers.get("content-type", "").lower()
