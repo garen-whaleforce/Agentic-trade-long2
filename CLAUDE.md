@@ -686,6 +686,7 @@ git log --oneline docs/decisions/
 
 | 日期 | 里程碑 | ADR |
 |------|--------|-----|
+| 2026-02-10 | **Dashboard v2 改版 + CI/CD 信號持久化修復** — PositionsTable score→prob bug 修正 + 新增 Sector/TP/SL/MaxHold 欄位；KpiCards 4→6 張（加 Exposure/TP Rate）；SignalHistory 原始 JSON→格式化表格（BUY/SKIP 分組）；CI/CD 修復：`mkdir -p signals` → `ln -sfn` 持久化目錄，防止部署時清空信號檔 | frontend/src/components/paper-trading/*.tsx, .github/workflows/*.yml |
 | 2026-02-10 | **gpu5090 每日信號自動化 + LINE 通知** — cron 每日 6:30 AM +8 (5:30 PM ET) 自動生成信號；LINE push 通知買進/賣出；gpu5090 vs 本地輸出一致性驗證通過（5 events prob 完全相同）；前端標題 Rocket Screener → Contrarian Alpha | run_daily_signal.sh, cron on gpu5090 |
 | 2026-02-10 | **CI/CD Pipeline 完成** — Docker 單容器（supervisord）+ GitHub Actions（dev smoke test + main staging→production）；`WhaleforceAI/contrarian-alpha` repo 建立；6/6 CI tests 通過；Production deploy 成功（backend:8400 + frontend:3400） | Dockerfile, supervisord.conf, .github/workflows/, tests/api_test.py |
 | 2026-02-10 | **Paper Trading Dashboard 前端完成** — FastAPI 後端 6 個 API + Next.js Dashboard（KPI 卡片、可排序持倉表、信號歷史、凍結配置顯示）；5 輪正反方辯論設計；8 個 API 測試全通過；`npm run build` 成功 | frontend/src/app/dashboard/, backend/api/routes/paper_trading.py |

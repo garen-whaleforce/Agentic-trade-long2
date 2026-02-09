@@ -36,8 +36,11 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
-      - name: Create data directories
-        run: mkdir -p signals configs logs
+      - name: Link persistent data directories
+        run: |
+          ln -sfn /home/service/contrarian-alpha-data/signals signals
+          ln -sfn /home/service/contrarian-alpha-data/configs configs
+          ln -sfn /home/service/contrarian-alpha-data/logs logs
 
       - name: Build and start staging container
         run: |
@@ -121,8 +124,11 @@ jobs:
           ${{ secrets.ENV_FILE }}
           EOF
 
-      - name: Create data directories
-        run: mkdir -p signals configs logs
+      - name: Link persistent data directories
+        run: |
+          ln -sfn /home/service/contrarian-alpha-data/signals signals
+          ln -sfn /home/service/contrarian-alpha-data/configs configs
+          ln -sfn /home/service/contrarian-alpha-data/logs logs
 
       - name: Deploy to production
         run: |
