@@ -39,7 +39,8 @@ jobs:
       - name: Link persistent data directories
         run: |
           ln -sfn /home/service/contrarian-alpha-data/signals signals
-          mkdir -p configs logs
+          ln -sfn /home/service/contrarian-alpha-data/configs configs
+          ln -sfn /home/service/contrarian-alpha-data/logs logs
 
       - name: Build and start staging container
         run: |
@@ -126,7 +127,8 @@ jobs:
       - name: Link persistent data directories
         run: |
           ln -sfn /home/service/contrarian-alpha-data/signals signals
-          mkdir -p configs logs
+          ln -sfn /home/service/contrarian-alpha-data/configs configs
+          ln -sfn /home/service/contrarian-alpha-data/logs logs
 
       - name: Deploy to production
         run: |

@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SIGNALS_DIR = PROJECT_ROOT / "signals"
 POSITIONS_FILE = SIGNALS_DIR / "open_positions.json"
 CONFIG_FILE = PROJECT_ROOT / "configs" / "v9_g2_frozen.yaml"
-LOG_FILE = PROJECT_ROOT / "logs" / "daily_signal.log"
+LOGS_DIR = PROJECT_ROOT / "logs"
 
 app = FastAPI(title="Contrarian Alpha — Paper Trading API")
 
@@ -126,15 +126,20 @@ def get_config():
 def get_health():
     last_log_time = None
     last_log_line = None
-    if LOG_FILE.exists():
-        stat = LOG_FILE.stat()
-        last_log_time = datetime.fromtimestamp(stat.st_mtime).isoformat()
-        with open(LOG_FILE) as f:
-            lines = f.readlines()
-            for line in reversed(lines):
-                if line.strip():
-                    last_log_line = line.strip()
-                    break
+
+    # Find latest log file matching daily_signal_*.log pattern
+    if LOGS_DIR.exists():
+        log_files = sorted(LOGS_DIR.glob("daily_signal_*.log"))
+        if log_files:
+            latest_log = log_files[-1]
+            stat = latest_log.stat()
+            last_log_time = datetime.fromtimestamp(stat.st_mtime).isoformat()
+            with open(latest_log) as f:
+                lines = f.readlines()
+                for line in reversed(lines):
+                    if line.strip():
+                        last_log_line = line.strip()
+                        break
 
     signal_days = 0
     if SIGNALS_DIR.exists():
