@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { KpiCards } from '@/components/paper-trading/KpiCards';
 import { PositionsTable } from '@/components/paper-trading/PositionsTable';
 import { SignalHistory } from '@/components/paper-trading/SignalHistory';
@@ -20,6 +20,10 @@ export default function PaperTradingDashboard() {
   const [health, setHealth] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const REFRESH_INTERVAL_MS = 60_000; // 60 seconds
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -43,11 +47,17 @@ export default function PaperTradingDashboard() {
       setError(e instanceof Error ? e.message : 'Failed to fetch data');
     } finally {
       setLoading(false);
+      setLastRefresh(new Date());
     }
   }, []);
 
+  // Initial fetch + auto-refresh every 60s
   useEffect(() => {
     fetchData();
+    intervalRef.current = setInterval(fetchData, REFRESH_INTERVAL_MS);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [fetchData]);
 
   const tabs: { id: TabId; label: string }[] = [
@@ -66,16 +76,23 @@ export default function PaperTradingDashboard() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Paper Trading</h2>
           <p className="text-xs text-slate-500 mt-0.5" style={MONO}>
-            V9 G2 TP10 | Half Weight until 2026-03-08
+            V9 G2 TP10{config?.half_weight_enabled ? ` | Half Weight until ${config.half_weight_until}` : ''}
           </p>
         </div>
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="px-3 py-1.5 text-xs text-slate-600 border border-slate-300 rounded-sm hover:bg-slate-50 transition-colors disabled:opacity-50"
-        >
-          {loading ? 'Loading...' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-3">
+          {lastRefresh && (
+            <span className="text-[10px] text-slate-400" style={MONO}>
+              {lastRefresh.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="px-3 py-1.5 text-xs text-slate-600 border border-slate-300 rounded-sm hover:bg-slate-50 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Error state */}

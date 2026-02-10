@@ -48,4 +48,7 @@ ENV FRONTEND_PORT=3400
 # Data directories are volume-mounted at runtime:
 # signals/, configs/, logs/
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:${BACKEND_PORT}/health || exit 1
+
 CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

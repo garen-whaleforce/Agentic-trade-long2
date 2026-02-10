@@ -11,6 +11,7 @@ Usage:
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -50,8 +51,19 @@ app.add_middleware(
 def _load_positions() -> dict:
     if not POSITIONS_FILE.exists():
         return {"open": [], "closed": []}
-    with open(POSITIONS_FILE) as f:
-        return json.load(f)
+    try:
+        with open(POSITIONS_FILE) as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            logger.warning("positions file is not a dict, returning empty")
+            return {"open": [], "closed": []}
+        return data
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.error(f"Corrupt positions file: {e}")
+        return {"open": [], "closed": []}
+
+
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 @app.get("/api/paper-trading/summary")
@@ -110,11 +122,16 @@ def get_signal_dates():
 
 @app.get("/api/paper-trading/signals")
 def get_signals(date: str = Query(...)):
+    if not _DATE_RE.match(date):
+        raise HTTPException(status_code=400, detail="Invalid date format (expected YYYY-MM-DD)")
     signal_file = SIGNALS_DIR / date / "signals.json"
     if not signal_file.exists():
         raise HTTPException(status_code=404, detail=f"No signals for {date}")
-    with open(signal_file) as f:
-        return json.load(f)
+    try:
+        with open(signal_file) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, ValueError) as e:
+        raise HTTPException(status_code=500, detail=f"Corrupt signal file: {e}")
 
 
 @app.get("/api/paper-trading/config")
