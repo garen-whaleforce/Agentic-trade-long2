@@ -60,6 +60,7 @@ class DailyRunResult(BaseModel):
     trade_signals: int
     no_trade_signals: int
     positions_opened: int
+    entries_filled: int = 0  # PENDING -> OPEN with entry_price
     positions_closed: int
     errors: List[str]
 
@@ -220,11 +221,17 @@ class PaperTradingRunner:
                     result.no_trade_signals += 1
                     self.metrics.record("no_trade_signal", 1)
 
-            # Step 4: Check for positions to close
+            # Step 4: Fill pending entries (PENDING -> OPEN with entry_price)
+            entries_filled = await self._fill_pending_entries(run_date)
+            result.entries_filled = entries_filled
+            if entries_filled:
+                logger.info(f"Filled {entries_filled} pending entries")
+
+            # Step 5: Check for positions to close
             closed = await self._close_due_positions(run_date)
             result.positions_closed = closed
 
-            # Step 5: Log summary
+            # Step 6: Log summary
             self.artifact_logger.log_summary(run_id, result.model_dump())
 
             result.status = "completed"
@@ -372,35 +379,74 @@ class PaperTradingRunner:
             logger.error(f"Failed to open position: {e}")
             return None
 
+    async def _fill_pending_entries(self, as_of_date: date) -> int:
+        """
+        Fill pending orders that should enter on the given date.
+
+        This converts PENDING orders to OPEN positions by:
+        1. Getting orders due to enter today
+        2. Fetching entry prices from market data
+        3. Marking orders as entered with actual prices
+
+        Fail-closed: If price cannot be fetched, order stays PENDING.
+        """
+        from services.market_data_client import get_market_data_client
+
+        try:
+            client = get_market_data_client()
+            pending_entries = self.order_book.get_pending_entries(as_of_date)
+
+            if not pending_entries:
+                return 0
+
+            filled_count = 0
+            for order in pending_entries:
+                try:
+                    # Get entry price (close price of entry_date)
+                    entry_price = client.get_close_price(order.symbol, as_of_date)
+
+                    if entry_price is None:
+                        logger.warning(
+                            f"No entry price for {order.symbol} on {as_of_date}, "
+                            "order stays pending (fail-closed)"
+                        )
+                        continue
+
+                    # Mark order as entered
+                    self.order_book.mark_entered(order.order_id, entry_price)
+                    filled_count += 1
+                    logger.info(
+                        f"Filled entry for {order.symbol}: "
+                        f"order_id={order.order_id}, price={entry_price}"
+                    )
+
+                except Exception as e:
+                    logger.error(f"Failed to fill entry for {order.order_id}: {e}")
+
+            if filled_count:
+                self.metrics.record("entries_filled", filled_count)
+
+            return filled_count
+
+        except Exception as e:
+            logger.error(f"Failed to fill pending entries: {e}")
+            return 0
+
     async def _close_due_positions(self, as_of_date: date) -> int:
         """Close positions that are due to exit."""
+        from services.market_data_client import get_market_data_client
+
         try:
-            # Define price fetcher - in production this would call market data API
-            async def get_close_price(symbol: str, date_: date) -> Optional[float]:
+            client = get_market_data_client()
+
+            # Price fetcher using market_data_client (synchronous)
+            def price_fetcher(symbol: str, date_: date) -> Optional[float]:
                 """Fetch closing price from market data source."""
                 try:
-                    # TODO: Replace with actual market data API call
-                    # For now, we'll use the earnings client if it has price data
-                    # or raise to trigger fail-closed
-                    from services.market_data_client import get_market_data_client
-                    client = get_market_data_client()
-                    return await client.get_close_price(symbol, date_)
-                except ImportError:
-                    logger.warning("market_data_client not available, cannot fetch prices")
-                    return None
+                    return client.get_close_price(symbol, date_)
                 except Exception as e:
                     logger.error(f"Failed to get price for {symbol} on {date_}: {e}")
                     return None
-
-            # Sync wrapper for the price fetcher
-            def price_fetcher(symbol: str, date_: date) -> Optional[float]:
-                import asyncio
-                try:
-                    loop = asyncio.get_event_loop()
-                    return loop.run_until_complete(get_close_price(symbol, date_))
-                except RuntimeError:
-                    # No event loop, create one
-                    return asyncio.run(get_close_price(symbol, date_))
 
             closed = self.order_book.close_due_positions(as_of_date, price_fetcher=price_fetcher)
             if closed:

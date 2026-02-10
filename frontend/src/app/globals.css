@@ -87,3 +87,8 @@ body {
 .badge-info {
   @apply bg-blue-100 text-blue-800;
 }
+
+/* Paper Trading styles */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

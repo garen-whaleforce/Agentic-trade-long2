@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite:///./data/rocket_screener.db"
 
+    # PostgreSQL (market data)
+    postgres_host: str = "172.23.22.100"
+    postgres_port: int = 5432
+    postgres_database: str = "whaleforce"
+    postgres_user: str = "whaleforce"
+    postgres_password: str = "whaleforce.ai"
+
     # External APIs
     earningscall_api_key: str = ""
     earningscall_api_url: str = "https://api.earningscall.com/v1"

@@ -1,0 +1,1262 @@
+[
+  {
+    "entry_id": "SPG_2020-05-13",
+    "symbol": "SPG",
+    "event_date": "2020-05-13",
+    "transcript_id": "9760",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Simon Property Group",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -5.48%, 30D return: 75.1%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 75.1
+  },
+  {
+    "entry_id": "VTR_2020-05-11",
+    "symbol": "VTR",
+    "event_date": "2020-05-11",
+    "transcript_id": "9140",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Ventas",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -7.77%, 30D return: 51.79%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 51.79
+  },
+  {
+    "entry_id": "SMCI_2024-11-06",
+    "symbol": "SMCI",
+    "event_date": "2024-11-06",
+    "transcript_id": "2244",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2025,
+    "company_name": "Supermicro",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -8.01%, 30D return: 51.62%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 51.62
+  },
+  {
+    "entry_id": "COIN_2024-10-31",
+    "symbol": "COIN",
+    "event_date": "2024-10-31",
+    "transcript_id": "2062",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2024,
+    "company_name": "Coinbase Global",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -13.63%, 30D return: 38.51%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 38.51
+  },
+  {
+    "entry_id": "APA_2020-11-05",
+    "symbol": "APA",
+    "event_date": "2020-11-05",
+    "transcript_id": "10179",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2020,
+    "company_name": "APA Corporation",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -5.01%, 30D return: 37.6%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 37.6
+  },
+  {
+    "entry_id": "LYV_2020-05-11",
+    "symbol": "LYV",
+    "event_date": "2020-05-11",
+    "transcript_id": "7768",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Live Nation Entertainment",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -9.06%, 30D return: 36.06%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 36.06
+  },
+  {
+    "entry_id": "CBRE_2020-05-11",
+    "symbol": "CBRE",
+    "event_date": "2020-05-11",
+    "transcript_id": "9428",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "CBRE Group",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -10.58%, 30D return: 33.39%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 33.39
+  },
+  {
+    "entry_id": "FCX_2021-01-26",
+    "symbol": "FCX",
+    "event_date": "2021-01-26",
+    "transcript_id": "8918",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2020,
+    "company_name": "Freeport-McMoRan",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -11.01%, 30D return: 31.4%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 31.4
+  },
+  {
+    "entry_id": "MAR_2020-05-11",
+    "symbol": "MAR",
+    "event_date": "2020-05-11",
+    "transcript_id": "10082",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Marriott International",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -8.99%, 30D return: 29.79%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 29.79
+  },
+  {
+    "entry_id": "EFX_2022-10-20",
+    "symbol": "EFX",
+    "event_date": "2022-10-20",
+    "transcript_id": "5619",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2022,
+    "company_name": "Equifax",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -5.06%, 30D return: 29.34%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 29.34
+  },
+  {
+    "entry_id": "HOOD_2024-10-31",
+    "symbol": "HOOD",
+    "event_date": "2024-10-31",
+    "transcript_id": "2012",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2024,
+    "company_name": "Robinhood Markets, Inc.",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -15.03%, 30D return: 29.1%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 29.1
+  },
+  {
+    "entry_id": "TDG_2020-05-05",
+    "symbol": "TDG",
+    "event_date": "2020-05-05",
+    "transcript_id": "8341",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2020,
+    "company_name": "TransDigm Group",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -6.71%, 30D return: 28.14%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 28.14
+  },
+  {
+    "entry_id": "PWR_2020-05-11",
+    "symbol": "PWR",
+    "event_date": "2020-05-11",
+    "transcript_id": "9104",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Quanta Services",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -7.13%, 30D return: 26.05%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 26.05
+  },
+  {
+    "entry_id": "FSLR_2020-05-11",
+    "symbol": "FSLR",
+    "event_date": "2020-05-11",
+    "transcript_id": "7402",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "First Solar",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -8.63%, 30D return: 23.28%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 23.28
+  },
+  {
+    "entry_id": "NCLH_2020-11-10",
+    "symbol": "NCLH",
+    "event_date": "2020-11-10",
+    "transcript_id": "8061",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2020,
+    "company_name": "Norwegian Cruise Line Holdings",
+    "expected": {
+      "trade_candidate": true,
+      "score_min": 0.6,
+      "score_max": 0.95,
+      "key_flags": {
+        "guidance_positive": null,
+        "revenue_beat": null,
+        "margin_concern": false
+      },
+      "evidence_min": 2
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: GOOD_BALL, 1D return: -9.25%, 30D return: 23.2%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 23.2
+  },
+  {
+    "entry_id": "NCLH_2020-02-20",
+    "symbol": "NCLH",
+    "event_date": "2020-02-20",
+    "transcript_id": "12623",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Norwegian Cruise Line Holdings",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -9.71%, 30D return: -80.72%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -80.72
+  },
+  {
+    "entry_id": "PSKY_2020-02-20",
+    "symbol": "PSKY",
+    "event_date": "2020-02-20",
+    "transcript_id": "17170",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Paramount Skydance Corp",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -20.77%, 30D return: -64.28%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -64.28
+  },
+  {
+    "entry_id": "BLDR_2020-02-21",
+    "symbol": "BLDR",
+    "event_date": "2020-02-21",
+    "transcript_id": "11719",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Builders FirstSource",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -5.25%, 30D return: -62.21%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -62.21
+  },
+  {
+    "entry_id": "NFLX_2022-04-20",
+    "symbol": "NFLX",
+    "event_date": "2022-04-20",
+    "transcript_id": "8997",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2022,
+    "company_name": "Netflix",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -37.41%, 30D return: -46.5%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -46.5
+  },
+  {
+    "entry_id": "DOC_2020-02-26",
+    "symbol": "DOC",
+    "event_date": "2020-02-26",
+    "transcript_id": "14216",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Healthpeak Properties",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -8.1%, 30D return: -44.05%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -44.05
+  },
+  {
+    "entry_id": "LOW_2020-02-26",
+    "symbol": "LOW",
+    "event_date": "2020-02-26",
+    "transcript_id": "17602",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Lowe's",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -9.2%, 30D return: -42.79%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -42.79
+  },
+  {
+    "entry_id": "UHS_2020-02-27",
+    "symbol": "UHS",
+    "event_date": "2020-02-27",
+    "transcript_id": "13311",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Universal Health Services",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -8.48%, 30D return: -42.19%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -42.19
+  },
+  {
+    "entry_id": "MS_2020-02-26",
+    "symbol": "MS",
+    "event_date": "2020-02-26",
+    "transcript_id": "10381",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2020,
+    "company_name": "Morgan Stanley",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -5.45%, 30D return: -42.1%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -42.1
+  },
+  {
+    "entry_id": "APP_2022-02-16",
+    "symbol": "APP",
+    "event_date": "2022-02-16",
+    "transcript_id": "7088",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2021,
+    "company_name": "AppLovin Corporation",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -15.07%, 30D return: -41.66%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -41.66
+  },
+  {
+    "entry_id": "PANW_2020-02-25",
+    "symbol": "PANW",
+    "event_date": "2020-02-25",
+    "transcript_id": "7347",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2020,
+    "company_name": "Palo Alto Networks",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -20.1%, 30D return: -38.41%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -38.41
+  },
+  {
+    "entry_id": "MGM_2020-02-13",
+    "symbol": "MGM",
+    "event_date": "2020-02-13",
+    "transcript_id": "12683",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "MGM Resorts",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -6.36%, 30D return: -38.24%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -38.24
+  },
+  {
+    "entry_id": "MPWR_2024-10-31",
+    "symbol": "MPWR",
+    "event_date": "2024-10-31",
+    "transcript_id": "2669",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2024,
+    "company_name": "Monolithic Power Systems",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -17.44%, 30D return: -37.8%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -37.8
+  },
+  {
+    "entry_id": "META_2022-02-03",
+    "symbol": "META",
+    "event_date": "2022-02-03",
+    "transcript_id": "8653",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2021,
+    "company_name": "Meta Platforms",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -26.6%, 30D return: -37.0%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -37.0
+  },
+  {
+    "entry_id": "PLTR_2022-08-08",
+    "symbol": "PLTR",
+    "event_date": "2022-08-08",
+    "transcript_id": "2179",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2022,
+    "company_name": "Palantir Technologies",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -19.21%, 30D return: -36.42%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -36.42
+  },
+  {
+    "entry_id": "PYPL_2022-02-02",
+    "symbol": "PYPL",
+    "event_date": "2022-02-02",
+    "transcript_id": "8509",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2021,
+    "company_name": "PayPal",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -29.29%, 30D return: -36.33%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -36.33
+  },
+  {
+    "entry_id": "PNC_2023-01-18",
+    "symbol": "PNC",
+    "event_date": "2023-01-18",
+    "transcript_id": "5966",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2022,
+    "company_name": "PNC Financial Services",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -8.54%, 30D return: -0.54%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -0.54
+  },
+  {
+    "entry_id": "GLW_2024-07-30",
+    "symbol": "GLW",
+    "event_date": "2024-07-30",
+    "transcript_id": "5735",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2024,
+    "company_name": "Corning Inc.",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -6.26%, 30D return: -1.08%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -1.08
+  },
+  {
+    "entry_id": "EFX_2024-04-18",
+    "symbol": "EFX",
+    "event_date": "2024-04-18",
+    "transcript_id": "5613",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2024,
+    "company_name": "Equifax",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -9.04%, 30D return: 4.08%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 4.08
+  },
+  {
+    "entry_id": "WYNN_2024-11-05",
+    "symbol": "WYNN",
+    "event_date": "2024-11-05",
+    "transcript_id": "4379",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2024,
+    "company_name": "Wynn Resorts",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -10.8%, 30D return: 0.53%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 0.53
+  },
+  {
+    "entry_id": "STZ_2023-01-05",
+    "symbol": "STZ",
+    "event_date": "2023-01-05",
+    "transcript_id": "4806",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2023,
+    "company_name": "Constellation Brands",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -7.32%, 30D return: 0.16%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 0.16
+  },
+  {
+    "entry_id": "NFLX_2024-04-19",
+    "symbol": "NFLX",
+    "event_date": "2024-04-19",
+    "transcript_id": "4188",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2024,
+    "company_name": "Netflix",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -9.17%, 30D return: 0.47%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 0.47
+  },
+  {
+    "entry_id": "AMZN_2020-10-30",
+    "symbol": "AMZN",
+    "event_date": "2020-10-30",
+    "transcript_id": "9498",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2020,
+    "company_name": "Amazon",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -6.43%, 30D return: -0.81%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -0.81
+  },
+  {
+    "entry_id": "AMCR_2022-11-02",
+    "symbol": "AMCR",
+    "event_date": "2022-11-02",
+    "transcript_id": "2935",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2023,
+    "company_name": "Amcor",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -7.08%, 30D return: 3.45%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": 3.45
+  },
+  {
+    "entry_id": "CPAY_2022-05-06",
+    "symbol": "CPAY",
+    "event_date": "2022-05-06",
+    "transcript_id": "8001",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2022,
+    "company_name": "Corpay",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -11.11%, 30D return: -0.39%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -0.39
+  },
+  {
+    "entry_id": "GIS_2020-03-18",
+    "symbol": "GIS",
+    "event_date": "2020-03-18",
+    "transcript_id": "11260",
+    "fiscal_quarter": 3,
+    "fiscal_year": 2020,
+    "company_name": "General Mills",
+    "expected": {
+      "trade_candidate": null,
+      "score_min": 0.3,
+      "score_max": 0.7,
+      "key_flags": {},
+      "evidence_min": 1
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.5,
+    "notes": "Category: EDGE_CASE, 1D return: -10.04%, 30D return: -3.35%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -3.35
+  },
+  {
+    "entry_id": "PEG_2020-02-26",
+    "symbol": "PEG",
+    "event_date": "2020-02-26",
+    "transcript_id": "23103",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Public Service Enterprise Group",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -7.91%, 30D return: -35.8%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -35.8
+  },
+  {
+    "entry_id": "AIG_2020-02-13",
+    "symbol": "AIG",
+    "event_date": "2020-02-13",
+    "transcript_id": "22284",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "American International Group",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -10.69%, 30D return: -35.39%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -35.39
+  },
+  {
+    "entry_id": "VMC_2020-02-18",
+    "symbol": "VMC",
+    "event_date": "2020-02-18",
+    "transcript_id": "16710",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2019,
+    "company_name": "Vulcan Materials Company",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -7.87%, 30D return: -35.36%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -35.36
+  },
+  {
+    "entry_id": "PSKY_2023-05-04",
+    "symbol": "PSKY",
+    "event_date": "2023-05-04",
+    "transcript_id": "5760",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2023,
+    "company_name": "Paramount Skydance Corp",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -29.4%, 30D return: -34.63%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -34.63
+  },
+  {
+    "entry_id": "FIS_2023-02-13",
+    "symbol": "FIS",
+    "event_date": "2023-02-13",
+    "transcript_id": "4684",
+    "fiscal_quarter": 4,
+    "fiscal_year": 2022,
+    "company_name": "Fidelity National Information Services",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -10.1%, 30D return: -33.95%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -33.95
+  },
+  {
+    "entry_id": "MRNA_2024-08-01",
+    "symbol": "MRNA",
+    "event_date": "2024-08-01",
+    "transcript_id": "2619",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2024,
+    "company_name": "Moderna",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -27.38%, 30D return: -33.75%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -33.75
+  },
+  {
+    "entry_id": "CPRT_2020-02-20",
+    "symbol": "CPRT",
+    "event_date": "2020-02-20",
+    "transcript_id": "7999",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2020,
+    "company_name": "Copart",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -8.88%, 30D return: -33.49%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -33.49
+  },
+  {
+    "entry_id": "DG_2023-08-31",
+    "symbol": "DG",
+    "event_date": "2023-08-31",
+    "transcript_id": "23432",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2023,
+    "company_name": "Dollar General",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -17.37%, 30D return: -32.89%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -32.89
+  },
+  {
+    "entry_id": "OXY_2020-08-11",
+    "symbol": "OXY",
+    "event_date": "2020-08-11",
+    "transcript_id": "11412",
+    "fiscal_quarter": 2,
+    "fiscal_year": 2020,
+    "company_name": "Occidental Petroleum",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -9.47%, 30D return: -32.89%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -32.89
+  },
+  {
+    "entry_id": "TGT_2022-05-18",
+    "symbol": "TGT",
+    "event_date": "2022-05-18",
+    "transcript_id": "10842",
+    "fiscal_quarter": 1,
+    "fiscal_year": 2022,
+    "company_name": "Target Corporation",
+    "expected": {
+      "trade_candidate": false,
+      "score_min": 0.0,
+      "score_max": 0.4,
+      "key_flags": {
+        "guidance_positive": false,
+        "margin_concern": null
+      },
+      "evidence_min": 1,
+      "no_trade_reason": "structural_decline"
+    },
+    "labeled_by": "rule",
+    "labeled_at": "2026-02-02T09:31:20.706197Z",
+    "label_confidence": 0.9,
+    "notes": "Category: BAD_BALL, 1D return: -28.73%, 30D return: -32.73%",
+    "actual_price_change_5d": null,
+    "actual_price_change_30d": -32.73
+  }
+]

@@ -1,0 +1,106 @@
+name: CI/CD Dev Branch
+
+on:
+  push:
+    branches: [dev]
+
+env:
+  SERVICE_URL: http://localhost:18400
+  FRONTEND_URL: http://localhost:13400
+  ACTIONS_REPO: WhaleforceAI/github-actions-templates
+
+jobs:
+  api-tests:
+    runs-on: self-hosted
+    outputs:
+      service_running: ${{ steps.health-check.outputs.running }}
+
+    steps:
+      - name: Pre-cleanup
+        run: docker run --rm -v "${{ github.workspace }}:/workspace" alpine rm -rf /workspace/data-dev 2>/dev/null || true
+
+      - uses: actions/checkout@v4
+
+      - name: Checkout actions templates
+        run: |
+          rm -rf .github/actions-templates
+          gh repo clone ${{ env.ACTIONS_REPO }} .github/actions-templates -- --depth 1
+
+      - name: Create .env file from secrets
+        run: |
+          cat <<EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
+
+      - name: Link persistent data directories
+        run: |
+          ln -sfn /home/service/contrarian-alpha-data/signals signals
+          ln -sfn /home/service/contrarian-alpha-data/configs configs
+          ln -sfn /home/service/contrarian-alpha-data/logs logs
+
+      - name: Build and start dev container
+        run: |
+          docker compose -f docker-compose.dev.yml build --no-cache
+          docker compose -f docker-compose.dev.yml up -d
+
+      - name: Health check (backend)
+        id: health-check
+        run: |
+          sleep 15
+          for i in {1..10}; do
+            if curl -sf ${{ env.SERVICE_URL }}/health; then
+              echo "Backend healthy!"
+              echo "running=true" >> $GITHUB_OUTPUT
+              break
+            fi
+            sleep 5
+          done
+
+      - name: Health check (frontend)
+        run: |
+          echo "Waiting for Next.js frontend to start..."
+          for i in {1..20}; do
+            if curl -sf ${{ env.FRONTEND_URL }}/dashboard -o /dev/null; then
+              echo "Frontend healthy!"
+              break
+            fi
+            echo "Waiting for frontend... ($i/20)"
+            sleep 5
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify tests folder exists
+        run: |
+          if [ ! -d "tests" ]; then
+            echo "ERROR: tests/ folder not found"
+            exit 1
+          fi
+          ls -la tests/
+
+      - name: Run smoke tests
+        run: |
+          pip install pytest requests
+          pytest tests/api_test.py::TestHealthEndpoints -v \
+            --service-url=${{ env.SERVICE_URL }} \
+            --frontend-url=${{ env.FRONTEND_URL }}
+
+      - name: Claude auto-fix
+        if: failure()
+        env:
+          AUTOFIX_SCOPE: dev-smoke-tests
+          MAX_AUTOFIX_ATTEMPTS: '2'
+        run: |
+          chmod +x .github/actions-templates/scripts/auto_fix.sh
+          .github/actions-templates/scripts/auto_fix.sh
+
+  cleanup:
+    runs-on: self-hosted
+    needs: [api-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cleanup
+        run: docker compose -f docker-compose.dev.yml down -v --rmi local || true

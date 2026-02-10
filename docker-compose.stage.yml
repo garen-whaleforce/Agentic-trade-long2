@@ -1,0 +1,18 @@
+services:
+  contrarian-alpha-stage:
+    build:
+      context: .
+      args:
+        BACKEND_PORT: "18410"
+    container_name: contrarian-alpha-stage
+    network_mode: host
+    environment:
+      BACKEND_PORT: "18410"
+      FRONTEND_PORT: "13410"
+    env_file:
+      - .env
+    volumes:
+      - ./signals:/app/signals:ro
+      - ./configs:/app/configs
+      - ./logs:/app/logs:ro
+    restart: unless-stopped
