@@ -25,7 +25,7 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Minimal Python deps (only what paper_trading_server.py needs)
-RUN pip install --no-cache-dir fastapi uvicorn pyyaml
+RUN pip install --no-cache-dir fastapi uvicorn pyyaml httpx
 
 WORKDIR /app
 

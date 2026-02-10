@@ -8,13 +8,17 @@ Usage:
     # => http://localhost:8000
 """
 
+import hashlib
+import hmac
 import json
+import logging
 import os
 from datetime import datetime
 from pathlib import Path
 
+import httpx
 import yaml
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +26,12 @@ SIGNALS_DIR = PROJECT_ROOT / "signals"
 POSITIONS_FILE = SIGNALS_DIR / "open_positions.json"
 CONFIG_FILE = PROJECT_ROOT / "configs" / "v9_g2_frozen.yaml"
 LOGS_DIR = PROJECT_ROOT / "logs"
+LINE_USERS_FILE = PROJECT_ROOT / "configs" / "line_users.json"
+
+LINE_CHANNEL_TOKEN = os.environ.get("LINE_CHANNEL_TOKEN", "")
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "")
+
+logger = logging.getLogger("paper_trading")
 
 app = FastAPI(title="Contrarian Alpha — Paper Trading API")
 
@@ -155,6 +165,105 @@ def get_health():
         "positions_file_exists": POSITIONS_FILE.exists(),
         "config_file_exists": CONFIG_FILE.exists(),
     }
+
+
+# ---------------------------------------------------------------------------
+# LINE Webhook — auto-register users who follow or message the bot
+# ---------------------------------------------------------------------------
+
+def _load_line_users() -> list[dict]:
+    if not LINE_USERS_FILE.exists():
+        return []
+    with open(LINE_USERS_FILE) as f:
+        return json.load(f)
+
+
+def _save_line_users(users: list[dict]):
+    LINE_USERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(LINE_USERS_FILE, "w") as f:
+        json.dump(users, f, indent=2, ensure_ascii=False)
+
+
+def _verify_line_signature(body: bytes, signature: str) -> bool:
+    if not LINE_CHANNEL_SECRET:
+        return True  # skip verification if secret not configured
+    digest = hmac.new(
+        LINE_CHANNEL_SECRET.encode(), body, hashlib.sha256
+    ).digest()
+    import base64
+    expected = base64.b64encode(digest).decode()
+    return hmac.compare_digest(expected, signature)
+
+
+async def _reply_line(reply_token: str, text: str):
+    if not LINE_CHANNEL_TOKEN:
+        logger.warning("LINE_CHANNEL_TOKEN not set, cannot reply")
+        return
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            "https://api.line.me/v2/bot/message/reply",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {LINE_CHANNEL_TOKEN}",
+            },
+            json={
+                "replyToken": reply_token,
+                "messages": [{"type": "text", "text": text}],
+            },
+        )
+        logger.info(f"LINE reply: {resp.status_code} {resp.text}")
+
+
+@app.post("/api/line/webhook")
+async def line_webhook(request: Request):
+    body = await request.body()
+    signature = request.headers.get("x-line-signature", "")
+
+    if LINE_CHANNEL_SECRET and not _verify_line_signature(body, signature):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+
+    payload = json.loads(body)
+    events = payload.get("events", [])
+
+    for event in events:
+        event_type = event.get("type")
+        source = event.get("source", {})
+        user_id = source.get("userId")
+        reply_token = event.get("replyToken")
+
+        if not user_id:
+            continue
+
+        if event_type in ("follow", "message"):
+            users = _load_line_users()
+            existing_ids = {u["user_id"] for u in users}
+
+            if user_id not in existing_ids:
+                users.append({
+                    "user_id": user_id,
+                    "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "source": event_type,
+                })
+                _save_line_users(users)
+                logger.info(f"LINE user registered: {user_id} via {event_type}")
+
+                if reply_token:
+                    await _reply_line(
+                        reply_token,
+                        "歡迎訂閱 Contrarian Alpha 每日信號通知！\n"
+                        "每個交易日收盤後，你會收到當日交易信號與持倉更新。",
+                    )
+            else:
+                if reply_token and event_type == "message":
+                    await _reply_line(reply_token, "你已經訂閱囉，每個交易日都會推送通知！")
+
+    return {"status": "ok"}
+
+
+@app.get("/api/line/users")
+def list_line_users():
+    users = _load_line_users()
+    return {"users": users, "count": len(users)}
 
 
 if __name__ == "__main__":

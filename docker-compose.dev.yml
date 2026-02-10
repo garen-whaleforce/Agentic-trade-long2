@@ -13,6 +13,6 @@ services:
       - .env
     volumes:
       - ./signals:/app/signals:ro
-      - ./configs:/app/configs:ro
+      - ./configs:/app/configs
       - ./logs:/app/logs:ro
     restart: unless-stopped
