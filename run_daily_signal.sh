@@ -14,9 +14,8 @@ SCRIPT="${BASE_DIR}/scripts/daily_signal_v9.py"
 export FMP_API_KEY="TDc1M5BjkEmnB57iOmmfvi8QdBdRLYFA"
 export PYTHONPATH="${BASE_DIR}"
 
-# LINE Messaging API
-LINE_CHANNEL_TOKEN="VHPc2N8BeXU3ES5m43HrGKiC2neAeI0WdHFNQcxd4a0oHJ5jcJM8tw4bLZBDnxYYXvF7+bm/WoRpH7BA14NJi151e/m/zNJg/yAbIylD56h5wzpWoiT0NVaGae4XzB9jLReBBXFQT7enCLfGHYjJpwdB04t89/1O/w1cDnyilFU="
-LINE_USERS_FILE="${BASE_DIR}/configs/line_users.json"
+# LINE Push via centralized line-push-service (port 8730)
+LINE_PUSH_URL="http://localhost:8730/api/push"
 
 # Log
 LOG_DIR="${BASE_DIR}/logs"
@@ -24,34 +23,13 @@ mkdir -p "${LOG_DIR}"
 TODAY=$(date +%Y-%m-%d)
 LOG_FILE="${LOG_DIR}/daily_signal_$(date +%Y%m%d_%H%M%S).log"
 
-send_line_message_to_user() {
-    local user_id="$1"
-    local message="$2"
-    local payload
-    payload=$(jq -n --arg to "${user_id}" --arg text "${message}" \
-        '{"to": $to, "messages": [{"type": "text", "text": $text}]}')
-    local response
-    response=$(curl -s -w "\nHTTP:%{http_code}" -X POST https://api.line.me/v2/bot/message/push \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer ${LINE_CHANNEL_TOKEN}" \
-        -d "${payload}")
-    echo "LINE push to ${user_id}: ${response}"
-}
-
-send_line_message_all() {
+send_line_push() {
     local message="$1"
-    if [ ! -f "${LINE_USERS_FILE}" ]; then
-        echo "WARNING: LINE users file not found: ${LINE_USERS_FILE}"
-        return
-    fi
-    local user_count
-    user_count=$(jq 'length' "${LINE_USERS_FILE}")
-    echo "Sending LINE notification to ${user_count} user(s)..."
-    for i in $(seq 0 $((user_count - 1))); do
-        local uid
-        uid=$(jq -r ".[$i].user_id" "${LINE_USERS_FILE}")
-        send_line_message_to_user "${uid}" "${message}"
-    done
+    local response
+    response=$(curl -s -w "\nHTTP:%{http_code}" -X POST "${LINE_PUSH_URL}" \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n --arg msg "${message}" '{"message": $msg}')")
+    echo "LINE push: ${response}"
 }
 
 {
@@ -105,8 +83,8 @@ send_line_message_all() {
     MSG+=$'\n'$'\n'"Open positions: ${OPEN_COUNT}"
     MSG+=$'\n'"🔗 https://contrarian-alpha.gpu5090.whaleforce.dev/dashboard"
 
-    # Send LINE notification to ALL registered users
-    send_line_message_all "${MSG}"
+    # Send LINE notification via centralized service
+    send_line_push "${MSG}"
 
 } 2>&1 | tee -a "${LOG_FILE}"
 
