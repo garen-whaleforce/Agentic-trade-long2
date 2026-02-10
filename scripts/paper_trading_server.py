@@ -266,6 +266,43 @@ def list_line_users():
     return {"users": users, "count": len(users)}
 
 
+@app.post("/api/line/users")
+async def add_line_user(request: Request):
+    """Manually add a LINE user for push notifications."""
+    body = await request.json()
+    user_id = body.get("user_id", "").strip()
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id is required")
+
+    users = _load_line_users()
+    existing_ids = {u["user_id"] for u in users}
+
+    if user_id in existing_ids:
+        return {"status": "already_exists", "user_id": user_id}
+
+    users.append({
+        "user_id": user_id,
+        "added_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "source": "manual_api",
+    })
+    _save_line_users(users)
+    return {"status": "added", "user_id": user_id, "total_users": len(users)}
+
+
+@app.delete("/api/line/users/{user_id}")
+def remove_line_user(user_id: str):
+    """Remove a LINE user from push notifications."""
+    users = _load_line_users()
+    original_count = len(users)
+    users = [u for u in users if u["user_id"] != user_id]
+
+    if len(users) == original_count:
+        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+
+    _save_line_users(users)
+    return {"status": "removed", "user_id": user_id, "total_users": len(users)}
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("BACKEND_PORT", "8000"))
