@@ -34,9 +34,10 @@ jobs:
 
       - name: Link persistent data directories
         run: |
-          ln -sfn /home/service/contrarian-alpha-data/signals signals
-          ln -sfn /home/service/contrarian-alpha-data/configs configs
-          ln -sfn /home/service/contrarian-alpha-data/logs logs
+          rm -rf signals configs logs
+          ln -s /home/service/contrarian-alpha-data/signals signals
+          ln -s /home/service/contrarian-alpha-data/configs configs
+          ln -s /home/service/contrarian-alpha-data/logs logs
 
       - name: Build and start dev container
         run: |
