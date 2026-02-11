@@ -9,7 +9,7 @@ set -euo pipefail
 
 BASE_DIR="/home/service/contrarian-alpha"
 VENV="${BASE_DIR}/venv/bin/python3"
-SCRIPT="${BASE_DIR}/scripts/daily_signal_v9.py"
+SCRIPT="${BASE_DIR}/scripts/daily_signal_v10.py"
 
 export FMP_API_KEY="TDc1M5BjkEmnB57iOmmfvi8QdBdRLYFA"
 export PYTHONPATH="${BASE_DIR}"
@@ -45,45 +45,8 @@ send_line_push() {
 
     echo "=== Completed: $(date) ==="
 
-    # 3. Parse and send LINE notification
-    # Extract BUY signals
-    BUY_LINES=$(echo "${SIGNAL_OUTPUT}" | grep "→ BUY" || true)
-    # Extract exit events
-    EXIT_LINES=$(echo "${EXIT_OUTPUT}" | grep -E "(TP hit|SL hit|Max hold|closed)" || true)
-    # Extract trade count
-    TRADE_COUNT=$(echo "${SIGNAL_OUTPUT}" | grep "Trade signals:" | grep -o '[0-9]*' || echo "0")
-    EVENT_COUNT=$(echo "${SIGNAL_OUTPUT}" | grep "Events found:" | grep -o '[0-9]*' || echo "0")
-
-    # Build notification message using $'\n' for real newlines
-    MSG="📊 Contrarian Alpha Daily Report"
-    MSG+=$'\n'"📅 ${TODAY}"
-    MSG+=$'\n'
-    MSG+=$'\n'"Events: ${EVENT_COUNT} | Trades: ${TRADE_COUNT}"
-
-    if [ -n "${BUY_LINES}" ]; then
-        MSG+=$'\n'$'\n'"🟢 BUY Signals:"
-        while IFS= read -r line; do
-            SYMBOL=$(echo "$line" | awk '{print $1}')
-            PROB=$(echo "$line" | grep -o 'prob=[0-9.]*' | cut -d= -f2)
-            MSG+=$'\n'"  ${SYMBOL} (prob=${PROB})"
-        done <<< "${BUY_LINES}"
-    else
-        MSG+=$'\n'$'\n'"No new trades today."
-    fi
-
-    if [ -n "${EXIT_LINES}" ]; then
-        MSG+=$'\n'$'\n'"🔴 Exits:"
-        while IFS= read -r line; do
-            MSG+=$'\n'"  ${line}"
-        done <<< "${EXIT_LINES}"
-    fi
-
-    # Count open positions
-    OPEN_COUNT=$(echo "${SIGNAL_OUTPUT}" | grep "Open positions:" | grep -o '[0-9]*' || echo "?")
-    MSG+=$'\n'$'\n'"Open positions: ${OPEN_COUNT}"
-    MSG+=$'\n'"🔗 https://contrarian-alpha.gpu5090.whaleforce.dev/dashboard"
-
-    # Send LINE notification via centralized service
+    # 3. Build rich LINE notification using Python formatter
+    MSG=$(${VENV} "${BASE_DIR}/scripts/format_line_message.py" --date "${TODAY}" --base-dir "${BASE_DIR}")
     send_line_push "${MSG}"
 
 } 2>&1 | tee -a "${LOG_FILE}"

@@ -1,0 +1,1662 @@
+{
+  "_meta": {
+    "global_bounce_rate": 0.5233281493001555,
+    "global_avg_return": 0.020166951788491445,
+    "prior_weight": 3,
+    "n_events": 1286,
+    "n_symbols": 330,
+    "label_threshold": 0.01,
+    "data_range": "2017-01-25 to 2025-10-15",
+    "generated_at": "2026-02-11T14:18:40.830128"
+  },
+  "FFIV": {
+    "hist_bounce_rate": 0.397856,
+    "hist_avg_return": 0.005207,
+    "n_prior_events": 11
+  },
+  "MCK": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.033272,
+    "n_prior_events": 4
+  },
+  "QCOM": {
+    "hist_bounce_rate": 0.547499,
+    "hist_avg_return": 0.039858,
+    "n_prior_events": 9
+  },
+  "SMCI": {
+    "hist_bounce_rate": 0.285554,
+    "hist_avg_return": -0.0254,
+    "n_prior_events": 6
+  },
+  "DECK": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.031125,
+    "n_prior_events": 5
+  },
+  "AIZ": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.039117,
+    "n_prior_events": 3
+  },
+  "AKAM": {
+    "hist_bounce_rate": 0.47611,
+    "hist_avg_return": 0.010872,
+    "n_prior_events": 15
+  },
+  "AIG": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.019175,
+    "n_prior_events": 5
+  },
+  "HPE": {
+    "hist_bounce_rate": 0.505383,
+    "hist_avg_return": 0.033939,
+    "n_prior_events": 10
+  },
+  "WDAY": {
+    "hist_bounce_rate": 0.415453,
+    "hist_avg_return": -0.0051,
+    "n_prior_events": 8
+  },
+  "AXON": {
+    "hist_bounce_rate": 0.582306,
+    "hist_avg_return": 0.030039,
+    "n_prior_events": 10
+  },
+  "PANW": {
+    "hist_bounce_rate": 0.656998,
+    "hist_avg_return": 0.04294,
+    "n_prior_events": 7
+  },
+  "NKE": {
+    "hist_bounce_rate": 0.540713,
+    "hist_avg_return": 0.024686,
+    "n_prior_events": 11
+  },
+  "URI": {
+    "hist_bounce_rate": 0.196248,
+    "hist_avg_return": -0.071587,
+    "n_prior_events": 5
+  },
+  "CHRW": {
+    "hist_bounce_rate": 0.630832,
+    "hist_avg_return": 0.024408,
+    "n_prior_events": 9
+  },
+  "KLAC": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": 0.017425,
+    "n_prior_events": 5
+  },
+  "RMD": {
+    "hist_bounce_rate": 0.547499,
+    "hist_avg_return": 0.019292,
+    "n_prior_events": 9
+  },
+  "AMD": {
+    "hist_bounce_rate": 0.326427,
+    "hist_avg_return": 0.025664,
+    "n_prior_events": 11
+  },
+  "DXCM": {
+    "hist_bounce_rate": 0.505383,
+    "hist_avg_return": 0.007054,
+    "n_prior_events": 10
+  },
+  "MOS": {
+    "hist_bounce_rate": 0.547499,
+    "hist_avg_return": 0.047558,
+    "n_prior_events": 9
+  },
+  "NRG": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.01732,
+    "n_prior_events": 2
+  },
+  "VRSK": {
+    "hist_bounce_rate": 0.696248,
+    "hist_avg_return": 0.047938,
+    "n_prior_events": 5
+  },
+  "IFF": {
+    "hist_bounce_rate": 0.437999,
+    "hist_avg_return": -0.013173,
+    "n_prior_events": 12
+  },
+  "GEN": {
+    "hist_bounce_rate": 0.505383,
+    "hist_avg_return": -0.005192,
+    "n_prior_events": 10
+  },
+  "HOLX": {
+    "hist_bounce_rate": 0.456998,
+    "hist_avg_return": 0.01472,
+    "n_prior_events": 7
+  },
+  "CSCO": {
+    "hist_bounce_rate": 0.597271,
+    "hist_avg_return": 0.016264,
+    "n_prior_events": 8
+  },
+  "NDSN": {
+    "hist_bounce_rate": 0.324544,
+    "hist_avg_return": -0.002591,
+    "n_prior_events": 8
+  },
+  "KR": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.0323,
+    "n_prior_events": 2
+  },
+  "MU": {
+    "hist_bounce_rate": 0.464165,
+    "hist_avg_return": -0.008058,
+    "n_prior_events": 9
+  },
+  "CSX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.004667,
+    "n_prior_events": 3
+  },
+  "UAL": {
+    "hist_bounce_rate": 0.630832,
+    "hist_avg_return": 0.074992,
+    "n_prior_events": 9
+  },
+  "PTC": {
+    "hist_bounce_rate": 0.415453,
+    "hist_avg_return": -0.003673,
+    "n_prior_events": 8
+  },
+  "UHS": {
+    "hist_bounce_rate": 0.42846,
+    "hist_avg_return": -0.009985,
+    "n_prior_events": 10
+  },
+  "WAB": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.00436,
+    "n_prior_events": 2
+  },
+  "WYNN": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": -0.053155,
+    "n_prior_events": 6
+  },
+  "FTNT": {
+    "hist_bounce_rate": 0.571332,
+    "hist_avg_return": 0.024333,
+    "n_prior_events": 12
+  },
+  "PSA": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.047717,
+    "n_prior_events": 3
+  },
+  "TER": {
+    "hist_bounce_rate": 0.68818,
+    "hist_avg_return": 0.038946,
+    "n_prior_events": 8
+  },
+  "TYL": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.01935,
+    "n_prior_events": 5
+  },
+  "MO": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.002475,
+    "n_prior_events": 1
+  },
+  "SBUX": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.053245,
+    "n_prior_events": 6
+  },
+  "WDC": {
+    "hist_bounce_rate": 0.65923,
+    "hist_avg_return": 0.003585,
+    "n_prior_events": 10
+  },
+  "DVA": {
+    "hist_bounce_rate": 0.582306,
+    "hist_avg_return": 0.020915,
+    "n_prior_events": 10
+  },
+  "MOH": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.031175,
+    "n_prior_events": 5
+  },
+  "ALB": {
+    "hist_bounce_rate": 0.729998,
+    "hist_avg_return": 0.065456,
+    "n_prior_events": 6
+  },
+  "BKNG": {
+    "hist_bounce_rate": 0.656998,
+    "hist_avg_return": 0.04308,
+    "n_prior_events": 7
+  },
+  "NVDA": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.035967,
+    "n_prior_events": 6
+  },
+  "NTAP": {
+    "hist_bounce_rate": 0.505383,
+    "hist_avg_return": -0.007261,
+    "n_prior_events": 10
+  },
+  "ULTA": {
+    "hist_bounce_rate": 0.756998,
+    "hist_avg_return": 0.03314,
+    "n_prior_events": 7
+  },
+  "COO": {
+    "hist_bounce_rate": 0.556998,
+    "hist_avg_return": 0.02565,
+    "n_prior_events": 7
+  },
+  "ORCL": {
+    "hist_bounce_rate": 0.714165,
+    "hist_avg_return": 0.051175,
+    "n_prior_events": 9
+  },
+  "COST": {
+    "hist_bounce_rate": 0.696248,
+    "hist_avg_return": 0.028075,
+    "n_prior_events": 5
+  },
+  "BKR": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.0381,
+    "n_prior_events": 3
+  },
+  "GE": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": -0.02206,
+    "n_prior_events": 2
+  },
+  "CMG": {
+    "hist_bounce_rate": 0.779089,
+    "hist_avg_return": 0.074355,
+    "n_prior_events": 8
+  },
+  "EW": {
+    "hist_bounce_rate": 0.571332,
+    "hist_avg_return": 0.01692,
+    "n_prior_events": 12
+  },
+  "DLR": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.0309,
+    "n_prior_events": 3
+  },
+  "CINF": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.01375,
+    "n_prior_events": 5
+  },
+  "EXPE": {
+    "hist_bounce_rate": 0.630832,
+    "hist_avg_return": -0.01125,
+    "n_prior_events": 9
+  },
+  "MRK": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.02255,
+    "n_prior_events": 1
+  },
+  "PAYC": {
+    "hist_bounce_rate": 0.505383,
+    "hist_avg_return": -0.016069,
+    "n_prior_events": 10
+  },
+  "TSLA": {
+    "hist_bounce_rate": 0.571332,
+    "hist_avg_return": 0.055093,
+    "n_prior_events": 12
+  },
+  "TTD": {
+    "hist_bounce_rate": 0.321248,
+    "hist_avg_return": -0.04605,
+    "n_prior_events": 5
+  },
+  "WSM": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.023338,
+    "n_prior_events": 5
+  },
+  "ADSK": {
+    "hist_bounce_rate": 0.597271,
+    "hist_avg_return": 0.016682,
+    "n_prior_events": 8
+  },
+  "TXN": {
+    "hist_bounce_rate": 0.656998,
+    "hist_avg_return": 0.01986,
+    "n_prior_events": 7
+  },
+  "PGR": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.0715,
+    "n_prior_events": 2
+  },
+  "PFG": {
+    "hist_bounce_rate": 0.396665,
+    "hist_avg_return": 0.049022,
+    "n_prior_events": 6
+  },
+  "CDNS": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": -0.001087,
+    "n_prior_events": 5
+  },
+  "PYPL": {
+    "hist_bounce_rate": 0.506362,
+    "hist_avg_return": 0.004264,
+    "n_prior_events": 8
+  },
+  "TSCO": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": 0.037514,
+    "n_prior_events": 4
+  },
+  "GOOGL": {
+    "hist_bounce_rate": 0.396665,
+    "hist_avg_return": -0.009444,
+    "n_prior_events": 6
+  },
+  "CVX": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.01795,
+    "n_prior_events": 1
+  },
+  "ROP": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.05324,
+    "n_prior_events": 2
+  },
+  "XOM": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00235,
+    "n_prior_events": 1
+  },
+  "MCHP": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.0297,
+    "n_prior_events": 6
+  },
+  "ALL": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": 0.000629,
+    "n_prior_events": 4
+  },
+  "HAS": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 8e-05,
+    "n_prior_events": 2
+  },
+  "ICE": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.032775,
+    "n_prior_events": 1
+  },
+  "MTCH": {
+    "hist_bounce_rate": 0.630832,
+    "hist_avg_return": 0.033625,
+    "n_prior_events": 9
+  },
+  "PRU": {
+    "hist_bounce_rate": 0.696248,
+    "hist_avg_return": 0.0644,
+    "n_prior_events": 5
+  },
+  "TTWO": {
+    "hist_bounce_rate": 0.324544,
+    "hist_avg_return": -0.028436,
+    "n_prior_events": 8
+  },
+  "EQIX": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.028614,
+    "n_prior_events": 4
+  },
+  "ANET": {
+    "hist_bounce_rate": 0.598124,
+    "hist_avg_return": 0.016263,
+    "n_prior_events": 13
+  },
+  "DVN": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": -0.015514,
+    "n_prior_events": 4
+  },
+  "FSLR": {
+    "hist_bounce_rate": 0.779089,
+    "hist_avg_return": 0.051009,
+    "n_prior_events": 8
+  },
+  "SBAC": {
+    "hist_bounce_rate": 0.367141,
+    "hist_avg_return": 0.001972,
+    "n_prior_events": 4
+  },
+  "EOG": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.025217,
+    "n_prior_events": 3
+  },
+  "LYV": {
+    "hist_bounce_rate": 0.196248,
+    "hist_avg_return": -0.0281,
+    "n_prior_events": 5
+  },
+  "WBD": {
+    "hist_bounce_rate": 0.396665,
+    "hist_avg_return": 0.073856,
+    "n_prior_events": 6
+  },
+  "MNST": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.048543,
+    "n_prior_events": 4
+  },
+  "ROST": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.039333,
+    "n_prior_events": 6
+  },
+  "IBM": {
+    "hist_bounce_rate": 0.397856,
+    "hist_avg_return": 0.010743,
+    "n_prior_events": 11
+  },
+  "EBAY": {
+    "hist_bounce_rate": 0.371332,
+    "hist_avg_return": 0.000787,
+    "n_prior_events": 12
+  },
+  "T": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.020525,
+    "n_prior_events": 1
+  },
+  "GILD": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0316,
+    "n_prior_events": 1
+  },
+  "APA": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.042456,
+    "n_prior_events": 6
+  },
+  "COR": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.03778,
+    "n_prior_events": 2
+  },
+  "CVS": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": -0.01248,
+    "n_prior_events": 2
+  },
+  "NWSA": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": -0.006812,
+    "n_prior_events": 5
+  },
+  "A": {
+    "hist_bounce_rate": 0.321248,
+    "hist_avg_return": -0.008212,
+    "n_prior_events": 5
+  },
+  "AMAT": {
+    "hist_bounce_rate": 0.456998,
+    "hist_avg_return": 0.0135,
+    "n_prior_events": 7
+  },
+  "JBL": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.059,
+    "n_prior_events": 2
+  },
+  "NFLX": {
+    "hist_bounce_rate": 0.42846,
+    "hist_avg_return": -0.005615,
+    "n_prior_events": 10
+  },
+  "SWKS": {
+    "hist_bounce_rate": 0.456998,
+    "hist_avg_return": -0.00488,
+    "n_prior_events": 7
+  },
+  "F": {
+    "hist_bounce_rate": 0.469285,
+    "hist_avg_return": -0.009171,
+    "n_prior_events": 11
+  },
+  "LVS": {
+    "hist_bounce_rate": 0.261664,
+    "hist_avg_return": -0.02515,
+    "n_prior_events": 3
+  },
+  "META": {
+    "hist_bounce_rate": 0.456998,
+    "hist_avg_return": -0.00617,
+    "n_prior_events": 7
+  },
+  "MHK": {
+    "hist_bounce_rate": 0.324544,
+    "hist_avg_return": -0.020718,
+    "n_prior_events": 8
+  },
+  "EA": {
+    "hist_bounce_rate": 0.396665,
+    "hist_avg_return": 0.0189,
+    "n_prior_events": 6
+  },
+  "EQT": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.042511,
+    "n_prior_events": 6
+  },
+  "INTC": {
+    "hist_bounce_rate": 0.312856,
+    "hist_avg_return": -0.003486,
+    "n_prior_events": 18
+  },
+  "ZBRA": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.0562,
+    "n_prior_events": 4
+  },
+  "VTRS": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.021529,
+    "n_prior_events": 4
+  },
+  "FDX": {
+    "hist_bounce_rate": 0.506362,
+    "hist_avg_return": 0.000655,
+    "n_prior_events": 8
+  },
+  "CTAS": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.01764,
+    "n_prior_events": 2
+  },
+  "SYF": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.015925,
+    "n_prior_events": 1
+  },
+  "AMP": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.026733,
+    "n_prior_events": 3
+  },
+  "CAT": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0508,
+    "n_prior_events": 1
+  },
+  "CSGP": {
+    "hist_bounce_rate": 0.506362,
+    "hist_avg_return": 0.031364,
+    "n_prior_events": 8
+  },
+  "HUBB": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.02625,
+    "n_prior_events": 1
+  },
+  "RF": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.01255,
+    "n_prior_events": 1
+  },
+  "RTX": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.09208,
+    "n_prior_events": 2
+  },
+  "ALGN": {
+    "hist_bounce_rate": 0.464165,
+    "hist_avg_return": 0.000158,
+    "n_prior_events": 9
+  },
+  "EFX": {
+    "hist_bounce_rate": 0.556998,
+    "hist_avg_return": 0.05218,
+    "n_prior_events": 7
+  },
+  "NOC": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.0036,
+    "n_prior_events": 1
+  },
+  "AMZN": {
+    "hist_bounce_rate": 0.582306,
+    "hist_avg_return": 0.012977,
+    "n_prior_events": 10
+  },
+  "IRM": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.043825,
+    "n_prior_events": 1
+  },
+  "FISV": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0197,
+    "n_prior_events": 1
+  },
+  "AAPL": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": -0.00496,
+    "n_prior_events": 2
+  },
+  "KHC": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.003233,
+    "n_prior_events": 3
+  },
+  "MAR": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.002675,
+    "n_prior_events": 1
+  },
+  "GDDY": {
+    "hist_bounce_rate": 0.42846,
+    "hist_avg_return": 0.017669,
+    "n_prior_events": 10
+  },
+  "LULU": {
+    "hist_bounce_rate": 0.380832,
+    "hist_avg_return": 0.01865,
+    "n_prior_events": 9
+  },
+  "ADBE": {
+    "hist_bounce_rate": 0.324544,
+    "hist_avg_return": -0.011254,
+    "n_prior_events": 8
+  },
+  "CAG": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.01445,
+    "n_prior_events": 1
+  },
+  "LW": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.04566,
+    "n_prior_events": 2
+  },
+  "COF": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.016333,
+    "n_prior_events": 3
+  },
+  "MGM": {
+    "hist_bounce_rate": 0.464165,
+    "hist_avg_return": -0.012292,
+    "n_prior_events": 9
+  },
+  "EVRG": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.02,
+    "n_prior_events": 1
+  },
+  "HPQ": {
+    "hist_bounce_rate": 0.42846,
+    "hist_avg_return": -0.020677,
+    "n_prior_events": 10
+  },
+  "ISRG": {
+    "hist_bounce_rate": 0.285554,
+    "hist_avg_return": -0.0158,
+    "n_prior_events": 6
+  },
+  "GOOG": {
+    "hist_bounce_rate": 0.321248,
+    "hist_avg_return": -0.011612,
+    "n_prior_events": 5
+  },
+  "EIX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.001433,
+    "n_prior_events": 3
+  },
+  "JKHY": {
+    "hist_bounce_rate": 0.356998,
+    "hist_avg_return": -0.01537,
+    "n_prior_events": 7
+  },
+  "CTSH": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.002863,
+    "n_prior_events": 5
+  },
+  "MPWR": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.001917,
+    "n_prior_events": 3
+  },
+  "DELL": {
+    "hist_bounce_rate": 0.380832,
+    "hist_avg_return": -0.004742,
+    "n_prior_events": 9
+  },
+  "AVGO": {
+    "hist_bounce_rate": 0.696248,
+    "hist_avg_return": 0.077138,
+    "n_prior_events": 5
+  },
+  "ORLY": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": -0.002057,
+    "n_prior_events": 4
+  },
+  "ERIE": {
+    "hist_bounce_rate": 0.729998,
+    "hist_avg_return": 0.045078,
+    "n_prior_events": 6
+  },
+  "PFE": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.05392,
+    "n_prior_events": 2
+  },
+  "IR": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": 0.013733,
+    "n_prior_events": 6
+  },
+  "TRMB": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.02204,
+    "n_prior_events": 2
+  },
+  "MTD": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": 0.00488,
+    "n_prior_events": 2
+  },
+  "PWR": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.06332,
+    "n_prior_events": 2
+  },
+  "ON": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.058967,
+    "n_prior_events": 3
+  },
+  "FOXA": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.044817,
+    "n_prior_events": 3
+  },
+  "UBER": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.006138,
+    "n_prior_events": 5
+  },
+  "PCG": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.062625,
+    "n_prior_events": 1
+  },
+  "CRWD": {
+    "hist_bounce_rate": 0.556998,
+    "hist_avg_return": -0.02919,
+    "n_prior_events": 7
+  },
+  "FCX": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.04562,
+    "n_prior_events": 2
+  },
+  "OXY": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": 0.043333,
+    "n_prior_events": 6
+  },
+  "FANG": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.095767,
+    "n_prior_events": 3
+  },
+  "DRI": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.18814,
+    "n_prior_events": 2
+  },
+  "RJF": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": -0.01104,
+    "n_prior_events": 2
+  },
+  "PKG": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": -0.03962,
+    "n_prior_events": 2
+  },
+  "STX": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": -0.022625,
+    "n_prior_events": 5
+  },
+  "VRSN": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.020233,
+    "n_prior_events": 3
+  },
+  "CF": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.03655,
+    "n_prior_events": 3
+  },
+  "EXR": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": 0.008372,
+    "n_prior_events": 4
+  },
+  "CPRT": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.0447,
+    "n_prior_events": 3
+  },
+  "SNPS": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.018529,
+    "n_prior_events": 4
+  },
+  "BLDR": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": -0.021617,
+    "n_prior_events": 3
+  },
+  "PODD": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": 0.064345,
+    "n_prior_events": 6
+  },
+  "CCI": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.070717,
+    "n_prior_events": 3
+  },
+  "LOW": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.0157,
+    "n_prior_events": 1
+  },
+  "MRNA": {
+    "hist_bounce_rate": 0.556998,
+    "hist_avg_return": 0.14884,
+    "n_prior_events": 7
+  },
+  "TJX": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.03065,
+    "n_prior_events": 1
+  },
+  "GIS": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.04405,
+    "n_prior_events": 1
+  },
+  "ACN": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0654,
+    "n_prior_events": 1
+  },
+  "WFC": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.010825,
+    "n_prior_events": 1
+  },
+  "C": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.068425,
+    "n_prior_events": 1
+  },
+  "CB": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.0258,
+    "n_prior_events": 2
+  },
+  "IBKR": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.102967,
+    "n_prior_events": 3
+  },
+  "HIG": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.023983,
+    "n_prior_events": 3
+  },
+  "LH": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.01375,
+    "n_prior_events": 1
+  },
+  "NSC": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.01975,
+    "n_prior_events": 1
+  },
+  "COP": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.04445,
+    "n_prior_events": 1
+  },
+  "CTRA": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": 0.016563,
+    "n_prior_events": 5
+  },
+  "DOW": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0689,
+    "n_prior_events": 1
+  },
+  "EME": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.028375,
+    "n_prior_events": 1
+  },
+  "FTV": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.02342,
+    "n_prior_events": 2
+  },
+  "LKQ": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.026,
+    "n_prior_events": 1
+  },
+  "TAP": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.009525,
+    "n_prior_events": 1
+  },
+  "TPL": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.070567,
+    "n_prior_events": 3
+  },
+  "HWM": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.08715,
+    "n_prior_events": 1
+  },
+  "MPC": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.06644,
+    "n_prior_events": 2
+  },
+  "WELL": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.097325,
+    "n_prior_events": 1
+  },
+  "KIM": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.088725,
+    "n_prior_events": 1
+  },
+  "CAH": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.032,
+    "n_prior_events": 1
+  },
+  "CCL": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.10512,
+    "n_prior_events": 2
+  },
+  "CBRE": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.06005,
+    "n_prior_events": 1
+  },
+  "CTVA": {
+    "hist_bounce_rate": 0.696248,
+    "hist_avg_return": 0.038675,
+    "n_prior_events": 5
+  },
+  "DDOG": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.09035,
+    "n_prior_events": 3
+  },
+  "KEYS": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": -0.011189,
+    "n_prior_events": 6
+  },
+  "BEN": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.08675,
+    "n_prior_events": 1
+  },
+  "EQR": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.096375,
+    "n_prior_events": 1
+  },
+  "IEX": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.03932,
+    "n_prior_events": 2
+  },
+  "OMC": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.06945,
+    "n_prior_events": 3
+  },
+  "ADM": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.034425,
+    "n_prior_events": 1
+  },
+  "RL": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.1441,
+    "n_prior_events": 1
+  },
+  "JCI": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.038875,
+    "n_prior_events": 1
+  },
+  "CI": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.009675,
+    "n_prior_events": 1
+  },
+  "REG": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.08906,
+    "n_prior_events": 2
+  },
+  "NCLH": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.0292,
+    "n_prior_events": 3
+  },
+  "APD": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.0023,
+    "n_prior_events": 2
+  },
+  "CRM": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.029113,
+    "n_prior_events": 5
+  },
+  "NEE": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00275,
+    "n_prior_events": 1
+  },
+  "WRB": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.05908,
+    "n_prior_events": 2
+  },
+  "TDY": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0307,
+    "n_prior_events": 1
+  },
+  "FICO": {
+    "hist_bounce_rate": 0.795712,
+    "hist_avg_return": 0.067143,
+    "n_prior_events": 4
+  },
+  "VRTX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.01565,
+    "n_prior_events": 3
+  },
+  "WST": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.011783,
+    "n_prior_events": 3
+  },
+  "AMGN": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": -0.002375,
+    "n_prior_events": 5
+  },
+  "NOW": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.007275,
+    "n_prior_events": 1
+  },
+  "PLTR": {
+    "hist_bounce_rate": 0.556998,
+    "hist_avg_return": 0.07335,
+    "n_prior_events": 7
+  },
+  "STT": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.061125,
+    "n_prior_events": 1
+  },
+  "PSX": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00445,
+    "n_prior_events": 1
+  },
+  "HOOD": {
+    "hist_bounce_rate": 0.507776,
+    "hist_avg_return": 0.150467,
+    "n_prior_events": 6
+  },
+  "GL": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.0032,
+    "n_prior_events": 1
+  },
+  "KMI": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.01055,
+    "n_prior_events": 1
+  },
+  "V": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00725,
+    "n_prior_events": 1
+  },
+  "GNRC": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": -0.03768,
+    "n_prior_events": 2
+  },
+  "STE": {
+    "hist_bounce_rate": 0.446248,
+    "hist_avg_return": 0.003175,
+    "n_prior_events": 5
+  },
+  "REGN": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0183,
+    "n_prior_events": 1
+  },
+  "COIN": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.042225,
+    "n_prior_events": 5
+  },
+  "DIS": {
+    "hist_bounce_rate": 0.261664,
+    "hist_avg_return": -0.0059,
+    "n_prior_events": 3
+  },
+  "BK": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.01485,
+    "n_prior_events": 1
+  },
+  "NTRS": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00095,
+    "n_prior_events": 1
+  },
+  "LRCX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.007583,
+    "n_prior_events": 3
+  },
+  "CLX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.003583,
+    "n_prior_events": 3
+  },
+  "ITW": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.003,
+    "n_prior_events": 1
+  },
+  "MSI": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.0157,
+    "n_prior_events": 3
+  },
+  "MCO": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.013775,
+    "n_prior_events": 1
+  },
+  "PSKY": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.113729,
+    "n_prior_events": 4
+  },
+  "APP": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": -0.10066,
+    "n_prior_events": 2
+  },
+  "GRMN": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.01188,
+    "n_prior_events": 2
+  },
+  "FAST": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.03816,
+    "n_prior_events": 2
+  },
+  "NUE": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": -0.009728,
+    "n_prior_events": 4
+  },
+  "SLB": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.07025,
+    "n_prior_events": 1
+  },
+  "LII": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.003575,
+    "n_prior_events": 1
+  },
+  "AJG": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00785,
+    "n_prior_events": 1
+  },
+  "SWK": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.006075,
+    "n_prior_events": 1
+  },
+  "WTW": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00275,
+    "n_prior_events": 1
+  },
+  "DAY": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.03985,
+    "n_prior_events": 1
+  },
+  "IDXX": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.011733,
+    "n_prior_events": 3
+  },
+  "BALL": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.0092,
+    "n_prior_events": 1
+  },
+  "NWS": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": -0.00815,
+    "n_prior_events": 3
+  },
+  "RCL": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.101375,
+    "n_prior_events": 1
+  },
+  "VST": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.001025,
+    "n_prior_events": 1
+  },
+  "HD": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00555,
+    "n_prior_events": 1
+  },
+  "WMT": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.0134,
+    "n_prior_events": 1
+  },
+  "TGT": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.002875,
+    "n_prior_events": 1
+  },
+  "CBOE": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.030575,
+    "n_prior_events": 1
+  },
+  "DLTR": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.020975,
+    "n_prior_events": 1
+  },
+  "BBY": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.011375,
+    "n_prior_events": 1
+  },
+  "PPG": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.06584,
+    "n_prior_events": 2
+  },
+  "BRO": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": 0.008657,
+    "n_prior_events": 4
+  },
+  "MSFT": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.04464,
+    "n_prior_events": 2
+  },
+  "INVH": {
+    "hist_bounce_rate": 0.713997,
+    "hist_avg_return": 0.0435,
+    "n_prior_events": 2
+  },
+  "ABNB": {
+    "hist_bounce_rate": 0.618887,
+    "hist_avg_return": 0.036511,
+    "n_prior_events": 6
+  },
+  "AMCR": {
+    "hist_bounce_rate": 0.509998,
+    "hist_avg_return": 0.021672,
+    "n_prior_events": 4
+  },
+  "NEM": {
+    "hist_bounce_rate": 0.594997,
+    "hist_avg_return": 0.0254,
+    "n_prior_events": 3
+  },
+  "HST": {
+    "hist_bounce_rate": 0.261664,
+    "hist_avg_return": -0.009067,
+    "n_prior_events": 3
+  },
+  "D": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.000475,
+    "n_prior_events": 1
+  },
+  "SCHW": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": 0.01184,
+    "n_prior_events": 2
+  },
+  "AFL": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.0128,
+    "n_prior_events": 2
+  },
+  "DASH": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.074586,
+    "n_prior_events": 4
+  },
+  "TFC": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.019975,
+    "n_prior_events": 1
+  },
+  "MET": {
+    "hist_bounce_rate": 0.761664,
+    "hist_avg_return": 0.040217,
+    "n_prior_events": 3
+  },
+  "INTU": {
+    "hist_bounce_rate": 0.571248,
+    "hist_avg_return": 0.022788,
+    "n_prior_events": 5
+  },
+  "LHX": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": -0.01212,
+    "n_prior_events": 2
+  },
+  "ROL": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.024614,
+    "n_prior_events": 4
+  },
+  "VTR": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": 0.00516,
+    "n_prior_events": 2
+  },
+  "XYZ": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.000833,
+    "n_prior_events": 3
+  },
+  "DG": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.02155,
+    "n_prior_events": 1
+  },
+  "JBHT": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.024514,
+    "n_prior_events": 4
+  },
+  "FITB": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.093375,
+    "n_prior_events": 1
+  },
+  "KEY": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0993,
+    "n_prior_events": 1
+  },
+  "CPT": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0439,
+    "n_prior_events": 1
+  },
+  "UDR": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0453,
+    "n_prior_events": 1
+  },
+  "BXP": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.02776,
+    "n_prior_events": 2
+  },
+  "EG": {
+    "hist_bounce_rate": 0.652855,
+    "hist_avg_return": 0.028672,
+    "n_prior_events": 4
+  },
+  "HRL": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.019325,
+    "n_prior_events": 1
+  },
+  "LEN": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": -0.0026,
+    "n_prior_events": 2
+  },
+  "CPAY": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00095,
+    "n_prior_events": 1
+  },
+  "NXPI": {
+    "hist_bounce_rate": 0.428331,
+    "hist_avg_return": 0.022233,
+    "n_prior_events": 3
+  },
+  "RSG": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.02636,
+    "n_prior_events": 2
+  },
+  "WM": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.025725,
+    "n_prior_events": 1
+  },
+  "BA": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.006675,
+    "n_prior_events": 1
+  },
+  "APO": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.04135,
+    "n_prior_events": 1
+  },
+  "CMI": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.02525,
+    "n_prior_events": 1
+  },
+  "ETN": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.0379,
+    "n_prior_events": 1
+  },
+  "ACGL": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00335,
+    "n_prior_events": 1
+  },
+  "AES": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.008,
+    "n_prior_events": 1
+  },
+  "ETR": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.021475,
+    "n_prior_events": 1
+  },
+  "CPB": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.0066,
+    "n_prior_events": 1
+  },
+  "BDX": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.020225,
+    "n_prior_events": 1
+  },
+  "FRT": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00415,
+    "n_prior_events": 1
+  },
+  "EPAM": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.048675,
+    "n_prior_events": 1
+  },
+  "FE": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.020575,
+    "n_prior_events": 1
+  },
+  "TKO": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.02974,
+    "n_prior_events": 2
+  },
+  "DAL": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.073175,
+    "n_prior_events": 1
+  },
+  "BX": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.053775,
+    "n_prior_events": 1
+  },
+  "UNH": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.055775,
+    "n_prior_events": 1
+  },
+  "DOC": {
+    "hist_bounce_rate": 0.513997,
+    "hist_avg_return": 0.01468,
+    "n_prior_events": 2
+  },
+  "TMUS": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.029175,
+    "n_prior_events": 1
+  },
+  "ARE": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.01775,
+    "n_prior_events": 1
+  },
+  "OKE": {
+    "hist_bounce_rate": 0.313997,
+    "hist_avg_return": 0.00566,
+    "n_prior_events": 2
+  },
+  "BRK-B": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.004425,
+    "n_prior_events": 1
+  },
+  "SPG": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.009725,
+    "n_prior_events": 1
+  },
+  "ELV": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.045175,
+    "n_prior_events": 1
+  },
+  "LUV": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": -0.00095,
+    "n_prior_events": 1
+  },
+  "CNC": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.03355,
+    "n_prior_events": 1
+  },
+  "ESS": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.010625,
+    "n_prior_events": 1
+  },
+  "MDLZ": {
+    "hist_bounce_rate": 0.392496,
+    "hist_avg_return": 0.00425,
+    "n_prior_events": 1
+  },
+  "AVB": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.029275,
+    "n_prior_events": 1
+  },
+  "SW": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.022225,
+    "n_prior_events": 1
+  },
+  "CFG": {
+    "hist_bounce_rate": 0.642496,
+    "hist_avg_return": 0.044,
+    "n_prior_events": 1
+  }
+}

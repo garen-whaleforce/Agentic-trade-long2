@@ -1,0 +1,153 @@
+# V9 G2 TP10 Frozen Configuration — Paper Trading
+# Frozen at: 2026-02-09 (v2: added TP10 dynamic exit)
+# Original freeze: 2026-02-08 (devil_advocate_audit_3rounds)
+# GO/NO-GO: GO (5/5 criteria passed)
+
+# ── Model ──────────────────────────────────────────────────────────
+model_path: "models/v9_model_20260207_160910.pkl"
+model_type: "GradientBoosting"
+model_params:
+  n_estimators: 100
+  max_depth: 3
+  learning_rate: 0.08
+  min_samples_leaf: 4
+  min_samples_split: 8
+  subsample: 0.85
+  max_features: "sqrt"
+  random_state: 42
+
+# ── Features (16 total, must match model bundle) ──────────────────
+feature_count: 16
+feature_names:
+  - drop_1d
+  - eps_surprise
+  - eps_beat
+  - abs_drop
+  - sector_return_20d
+  - sector_breadth
+  - spy_above_200dma
+  - drop_x_sector
+  - sector_x_eps_sign
+  - beat_dump
+  - value_trap_score
+  - justified_drop
+  - sector_divergence
+  - drop_squared
+  - bear_duration_days
+  - vix_percentile
+
+# ── Trading Parameters ─────────────────────────────────────────────
+# Threshold provenance:
+#   1. train_ml_v9.py walk-forward sweep: optimal balanced threshold ~0.52-0.58
+#   2. grid_search_local.py: 800 combos × (thr ∈ [0.50,0.60], SL, weight, leverage)
+#   3. thr=0.58 selected as part of G2 config (best Sharpe 1.782)
+#   4. API validated: backtest ID 7cdbb4ed-fb66-491d-8c6d-0a349ed0409d
+#   5. Seed stability: threshold range 0.02 across 5 seeds (PASS)
+#   ⚠ Caution: threshold was optimized post-hoc on IS data (grid search P0 risk)
+threshold: 0.58
+stop_loss: 0.10          # 10% close-based
+weight: 0.15             # 15% of basis_equity per trade
+leverage: 2.5            # max exposure = equity × 2.5
+slippage: 0.001          # 0.10% estimated slippage per trade
+commission_per_share: 0.005
+
+# ── Dynamic Exit Rule (TP10) ─────────────────────────────────────
+# API validated: Sharpe 2.031 vs T30-only 1.782 (+0.249)
+# 57% of trades exit early at TP, avg hold 21d vs 30d
+exit_rule:
+  type: "take_profit_or_max_hold"
+  take_profit: 0.10      # exit when cumulative return >= +10%
+  max_hold: 30           # fallback: T+30 trading days
+  check_frequency: "daily"  # check TP condition daily at close
+
+# ── Half-Weight First Month ────────────────────────────────────────
+half_weight_enabled: true
+half_weight_until: "2026-03-08"
+half_weight_factor: 0.5  # weight × 0.5 = 7.5%
+
+# ── Data Sources ───────────────────────────────────────────────────
+db:
+  host: "172.23.22.100"
+  port: 5432
+  user: "whaleforce"
+  password: ""
+  database: "pead_reversal"
+
+tables:
+  events: "earnings_surprises"
+  prices: "historical_prices"
+  companies: "companies"
+  transcripts: "transcript_content"
+
+# ── Pipeline Logic (frozen, not configurable) ──────────────────────
+event_detection:
+  min_drop: -0.05        # drop >= 5%
+  require_eps_actual: true
+  require_eps_estimated: true
+
+sector_momentum:
+  lookback_calendar_days: 33   # ~20 trading days, uses (lookback * 7 / 5 + 5)
+  default_return: 0.0
+  default_breadth: 0.5
+
+spy_200dma:
+  lookback: 200
+  max_bear_duration: 200
+  bear_duration_normalized: true  # divide by 200
+
+vix_percentile:
+  window: 252
+  min_lookback: 60
+  default: 0.5
+
+# ── Event-level Data Flow ──────────────────────────────────────────
+# 1. Query earnings_surprises for target date
+# 2. JOIN companies for sector
+# 3. Get price_t0 (event_date close) and price_t1 (next trading day close)
+# 4. Filter: (price_t1 - price_t0) / price_t0 <= -0.05
+# 5. Compute 16 features (sector momentum, SPY 200DMA, VIX percentile)
+# 6. Model predict_proba → prob
+# 7. If prob >= 0.58 → BUY signal
+# 8. Entry: T+1 close price
+# 9. Exit: first of — TP (+10%) / SL (-10%) / MaxHold (T+30)
+# 10. Daily check open positions for TP/SL trigger
+
+# ── Backtester API Validation ──────────────────────────────────────
+api_backtest_ids:
+  g2_tp10: "210aa37b-7c16-44e1-b280-fd32c32e0e98"  # this config (current)
+  tech_penalty_tp10: "9adf2d66-4218-48a7-9ddf-8a8b725a7147"  # alternative
+  g2_t30: "7cdbb4ed-fb66-491d-8c6d-0a349ed0409d"  # previous (T+30 only)
+  g1: "a9113212-4f82-4049-8dd9-d44e5e483476"
+  g3: "9a8eca38-98c0-45e0-a0ce-68062173d0e5"
+
+api_results:
+  # G2 TP10 (current frozen config)
+  full_cagr: 47.1
+  full_sharpe: 2.031
+  full_mdd: 23.7
+  full_sortino: 3.22
+  full_calmar: 1.99
+  full_total_return: 2988.9
+  # G2 T30 (previous, for reference)
+  g2_t30_cagr: 51.0
+  g2_t30_sharpe: 1.782
+  g2_t30_mdd: 26.0
+  # OOS (from T30 analysis, TP10 OOS TBD)
+  oos_cagr: 21.4
+  oos_sharpe: 0.961
+  oos_mdd: 26.0
+
+# ── Audit Trail ────────────────────────────────────────────────────
+audit:
+  issues_found: 8
+  p0_issues: 3  # survivorship bias, IS dominance, grid search
+  survivorship_bias_impact_pp: 5.3
+  seed_stability_f1_std: 0.020
+  oos_median_trade: 0.0233
+  oos_p10: -0.0899
+  plan_file: ".claude/plans/frolicking-zooming-taco.md"
+  expectations_doc: "docs/PAPER_TRADING_EXPECTATIONS.md"
+
+# ── Version History ────────────────────────────────────────────────
+# v9_g2_tp10_20260209: Added TP10 dynamic exit (Sharpe 1.782 → 2.031)
+# v9_g2_frozen_20260208: Initial freeze after 3-round devil's advocate audit

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Lightweight Paper Trading API server — serves dashboard endpoints only.
-Reads from JSON/YAML files produced by daily_signal_v9.py.
+Reads from JSON/YAML files produced by daily_signal_v10.py.
 
 Usage:
     python3 scripts/paper_trading_server.py
@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SIGNALS_DIR = PROJECT_ROOT / "signals"
 POSITIONS_FILE = SIGNALS_DIR / "open_positions.json"
-CONFIG_FILE = PROJECT_ROOT / "configs" / "v9_g2_frozen.yaml"
+CONFIG_FILE = PROJECT_ROOT / "configs" / "v10_combined_frozen.yaml"
 LOGS_DIR = PROJECT_ROOT / "logs"
 
 logger = logging.getLogger("paper_trading")
